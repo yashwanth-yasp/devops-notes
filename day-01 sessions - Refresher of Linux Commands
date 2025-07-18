@@ -1,0 +1,184 @@
+---
+date: 2025-07-17
+tags:
+  - ust
+  - linux
+  - devops
+---
+
+# Refresher of Linux Commands 
+
+- It's basically just learning the linux commands again 
+- Like here [[General commands]]
+- so starting over 
+
+- pwd: find working directory 
+- ls : basic listing 
+- ls -l : detailed information 
+- ls -a : show hidden files 
+- ls -la : detailed info with hidden files 
+- cd : change directory 
+- cd -- : up one level 
+- cd ~ : home 
+- clear: clear 
+- whoami: displays the current user username 
+- which: shows where a command is located in the system
+	- which ls : /usr/bin/ls
+- mkdir: make directory 
+- mkdir -p something/somethinginside: making nested directories 
+- mkdir foder1 folder2: creating multiple directories
+- rmdir folder: remove folders 
+- touch file.txt : create file
+- touch file1.txt file2.txt : create multiple files 
+- cp file.txt anotherfile.txt : copy files 
+- cp -r folder1 folder2: copy folders
+- cp \*.txt backup/ : copy all txt files 
+- mv file.txt Documents/ : move file 
+- mv file.txt newname.txt: rename file 
+- mv folder1 folder2: rename folder 
+- rm file.txt: remove file 
+- rm -r folder: remove folder and contents 
+- rm -f file.txt: force remove - no confirmation 
+- rm \*txt: Delete all .txt files 
+- find . -name "filname" : find file by name 
+- find /home -name "\*.txt" : find all .txt files 
+- find -type d -name temp: find all folders wtih the name temp
+	- -type mentions what type of file we are searching for 
+	- d means directory 
+- find -type d -name "temp*": find all folders wtih the name starting with temp
+- find . -size +100MIf you delete or move the original file/directory, the symbolic link will become "broken" or "dangling" because it's still pointing to a non-existent path.
+- locate filname.txt : faster find 
+- locate "\*pdf"
+- ln sourcefile link_name : creates hard link to file.txt - [[ln command]]
+- ln -s file.txt softlink.txt: creates symbolic link (shortcut)
+- ln -s "/pathtofolder" linkfolder: link to folder 
+- cat file.txt : display file content all at once 
+- cat file1.txt file2.txt : showing multiple files 
+- less file1.txt : show file content one screen at a time 
+- head file.txt: show first 10 lines of a file 
+- head -n 5 file.txt: show first 5 lines of a file 
+- tail file.txt: show last 10 lines of the file 
+- tail -n 5 file.txt: show last 5 lines of the file 
+- tail -f log.txt: follow file changes (great for logging)
+- grep "hello" file.txt: find hello in file
+- grep -i "HELLO" file.txt: case-insensitive search 
+- grep -r "error" /var/log: search recursively
+- grep -v "pattern" file.txt: show lines NOT matching the pattern 
+- grep -C "pattern" file.txt: show two lines before and after match 
+- grep -rli "pattern" . : find files containing that pattern 
+- echo "hi" : print 
+- echo "hi" > file.txt : save the text into the file (overwrites)
+- echo "hi" >> file.txt : concatenate the text to the end of the file 
+- wc file.txt : shows lines, words, characters 
+- wc -l file.txt : shows lines
+- wc -w file.txt : shows words 
+- wc -c file.txt : shows characters
+- sort file.txt : sorts alphabetically 
+- sort -n file.txt : sorts numerically 
+- sort -r file.txt : sorts in reverse order 
+- sort -u file.txt : sorts and removes duplicates 
+- tar -cvf archive.tar files/ :Create archive
+- tar -xvf archive.tar :Extract archive
+- tar -tvf archive.tar :List contents
+- tar -czvf archive.tar.gz files/ :Create compressed archive
+- tar -xzvf archive.tar.gz  :Extract compressed archive
+- gzip file.txt : compress file
+- gzip -d file.txt.gz : decompress file
+- zip -r archive.zip folder/
+- zip -d archive.zip file.txt 
+- unzip archive.zip 
+- unrzip -l archive.zip : list contents in the zip 
+- unzip -d /path/to/extract archive.zip :extract to specific directory 
+- ps : display your processes running 
+- ps aux : all processes 
+- ps aux | grep "firefox" : finding specific process 
+- ps -e -o pcpu,cpu,nice,state,cputime,args --sort pcpu | head -n 10  # Top CPU processes
+- top - overall system monitor 
+- top -u username - monitors specific user 
+- kill 1234 : kill process by pid
+- kill -9 1234 : force kill 
+- killall firefox : kill all firefox processes 
+- df -h : disk usage in human readable format 
+- df -hT : includes filesystem type
+- df -i : includes inode usage 
+- du -h file.txt : file size 
+- du -h folder/ : folder size 
+- du -sh folder/ : shows full size only 
+- du -h -d 1 : size of directories in the current location 
+- free -h : basic ram info 
+- free -m : in mb
+- uname : system info 
+- uname -a : all system info 
+- uname -r : kernel version 
+- date : date 🥀
+- cal : calendar
+- history : history
+- alias ll='ls -la' : create alias 
+- alias 
+- unalias ll : reverse 
+- time ls -la : measure the time the command takes 
+- ping google.com : ping 
+- ping -c 4 google.com : send only 4 packets
+-  wget <https://example.com/file.zip>  : downloads from link 
+-  wget -c <https://example.com/file.zip> : resumes interrupted download 
+- curl https://example.com : downloads webpage 
+- curl -O https://example.com/file.zip : save file with original name
+- curl -X POST https://api.example.com : make POST project 
+- ifonfig : show all network interfaces 
+- ifconfig eth0 : show specific interface
+- ifconfig eth0 up : bring interface up 
+- ifconfig eth0 down : bring interface down 
+- netstat -a : All connections 
+- netstat -l : listening ports 
+- netstat -r : routing table 
+- lsof : lists all open files 
+- lsof -i : internet connections 
+- lsof -i : 80: connections on port 80
+- ssh username@hostname : ssh 
+- ssh -p 2222 username@hostname : ssh on specific port 
+- scp file.txt user@host:/path/ : ssh copy
+- scp user@host:/path/file.txt . 
+- scp -r folder/ user@host:/path/ 
+- ssh-keygen -t rsa  : generate rsa key pari 
+- ssh-keygen -t ed25519 : generate ed22519 key pair 
+- whois example.com : domain information 
+- whois 8.8.8.8 : IP address information 
+- nc -l 8080  : listen on port 8080
+- who : current users
+- who -H : show header 
+- id : show user info 
+- id username : specific user info 
+- groups : list groups
+- groups username : list groups of that user
+- su username : switch to user
+- su - : switch to root 
+- su - username : switch to user with their environment 
+	- [[difference between su username and su - username]]
+- sudo : runs command with root previliges 
+- finger username : fingers the user for information 💅
+- finger : all logged in users 
+- shutdown -h now : shutdown immediately 
+- shutdown -r now : restart immediately
+- shutdown -h +10 : shotdown in 10 minutes
+- reboot : reboot now 
+- reboot -h now : restart immmediately (dawg what's the difference 😭)
+
+![[Pasted image 20250717174217.png]]
+
+- chmod 755 file.txt : Set specific permissions
+- chmod u+x file.txt : Add execute for owner
+- chmod g-w file.txt : Remove write for group
+- chmod o+r file.txt  : Add read for others
+- chmod +x script.sh  : Make file executable for all
+- chown: change who owns the file 
+- chgrp : change group ownership 
+- umask : sets default permissions to new files
+- umask 0022 : set umask 
+- getfacl file.txt : get file access control lists 
+- setfacl : set file access control lists
+- useradd : add new user 
+- adduser : add new user interactively 
+- passwd : change user password 
+- deluser : delete user account 
+- usermod : modify user account 
+
