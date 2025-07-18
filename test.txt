@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 This is a test file used to practice git commands
+branch1
+=======
+This is a test file used to practice git commands 
+branch1
+>>>>>>> test/branch1
