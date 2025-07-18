@@ -1,11 +1,2 @@
-<<<<<<< HEAD
 This is a test file used to practice git commands
 branch1
-=======
-This is a test file used to practice git commands 
-<<<<<<< HEAD
-branch1
->>>>>>> test/branch1
-=======
-branch1
->>>>>>> test/branch2
