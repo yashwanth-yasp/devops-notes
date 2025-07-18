@@ -11,7 +11,6 @@ tags:
 - It's basically just learning the linux commands again 
 - Like here [[General commands]]
 - so starting over 
-- [genspark link](https://genspark.fermion.app/course/ust-devops/nsockpmbrqkjokbt2il0n)
 
 - pwd: find working directory 
 - ls : basic listing 
