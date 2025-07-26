@@ -264,5 +264,4 @@ jobs:
 	- Use job dependencies 
 - Monitoring and Notifications 
 	- Add status badges to README.md
-	- Notify on failure (using `if: failure()`)
-- 
+	- Notify on failure (using `if: failure()`) 
