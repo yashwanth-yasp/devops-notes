@@ -1,0 +1,17 @@
+name: Hello World Workflow
+
+on: [push, pull_request]
+
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Say Hello
+      run: echo "Hello, World!"
+    
+    - name: Print Date
+      run: date
+    
+    - name: List Files
+      run: ls -la
