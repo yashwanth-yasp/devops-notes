@@ -18,7 +18,7 @@ tags:
 eksctl create cluster --name=eksydg --region=us-east-1 --zones=us-east-1a,us-east-1b --without-nodegroup
 ```
 
-![[Pasted image 20250801142451.png]]
+![[Screenshots/Pasted image 20250801142451.png]]
 
 ![[Pasted image 20250801142341.png]]
 
