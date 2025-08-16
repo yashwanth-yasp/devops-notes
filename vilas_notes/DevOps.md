@@ -1,0 +1,28 @@
+- Intro statement
+- DevOps has a lot of technologies in CI/CD and a lot of technologies which aren’t in it
+- One of them is IAC
+- IAC (Infrastructure as Code)
+    - Infrastructure Provisioning Tools
+        - Main fuction is to provision infrastructure, basically creating infrastructure
+        - Infrastructure doesn’t guarantee an in-place upgrade meaning that when you try to modify an infrastrucutre set up by these tools, it might be able to modify but there is no guarantee that it will modify that exact instance, sometimes it can terminate and start a new instance with the given modifications
+        - Terraform → Works with close to 2000 providers
+        - CloudFormation → AWS
+        - Bicep → Azure
+    - Configuration Management
+        - Configuration management tools manage instances or resources and modify all of the instances at the same time
+        - If you do it using scripts and do manually, some machines might have some differences which will cause a configuration drift and snowball into a something way different than the other machines
+        - Two models
+            - Pull model
+                - In pull model, an agent will reach out to the server and pull the changes necessary in the machine
+            - Push model
+                - In push model, the server will push the configuration to the instances, and upload the changes to  the instances
+            - Ansible is a push-pull model
+                - Here unlike the normal pull model, it is the ansible server wihich is pulling the details or “state” from the instances and according to that pushing the changes into the instances
+        - Ansible, Cheef, Puppet
+    - Server Templating tools
+        - Docker, Vagrant
+- Declarative vs Imperative Programming
+    - In Declarative Programming you don’t have to write business logic, you just have to “declare”
+        - Eg: In terraform, you just declare the creation of instances and the count, you don’t have to write a loop to create them, you can just declare them
+    - In Imperative Programming you have to write the business logic
+        - Eg: In boto3 if you want to create 3 instances you have to create a loop to create 3 instances

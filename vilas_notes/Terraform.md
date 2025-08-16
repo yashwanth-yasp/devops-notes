@@ -1,0 +1,12 @@
+- `terraform apply`
+    - It does apply on all the .tf files in the current directory
+- `.tfstate` file
+    - has information of what things were created last time
+- Terraform is smart enough to compare the .tf files, .tfstate file and the cloud to check for all changes and then modify
+- `terraform init`
+    - It does three things
+        - initialize the backend
+            - It decides where the `.tfstate` needs to go
+            - Generally you don’t edit or move tfstate files,
+        - initializing the plugins
+        - creating the log files

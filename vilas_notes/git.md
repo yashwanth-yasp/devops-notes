@@ -1,0 +1,3 @@
+- Why do we create branches?
+    - To isolate development and to not serve half cooked product to the user
+- If later in the commit path if we realize security issue, but we need all the new branches and releases to have that fix

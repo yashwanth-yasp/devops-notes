@@ -1,0 +1,55 @@
+# Architecture
+
+- Request goes to firewall and DNS,
+- then goes to loadbalancer
+- Loadbalacer
+    - types
+        - path based routing
+            - `/api/writeProperExam` will hit the microservice that manages htat path
+            - The loadbalancer will route this to the corresponding microservice
+    - first thing that happens after it’s rerouted is Authentication
+        - Authentication → are you allowed in
+        - Authorization → how much you are allowed in, basically the level of permissions you have
+    - It is NOT OKAY to have multiple microservices talk with a single database
+    - <caps theorem>
+    - Eventual consistency → Things are not immediately updated in multiple databases, but it will eventually be distributed (will there be any inconsistencies?)
+        - It will eventually get updated like product page and purchase page, the new product will eventually be updated to the purchase page
+        - But it will not update immediately so there can be issues in some cases
+            - If you deposit money in the account and it uses eventual consistency, then it might be a problem as immediate consistency is really important
+        - A good example of Eventual consistency would be something where an e-commerce app has an order placed, then it will eventually sync the data from frontend service to other services but it will say the order is placed in the frontend
+    - Microservice to Microservice communication
+        - Direct communication
+            - directly communicate with the service
+            - It’s a blocking call
+                - It waits till the response comes
+            - You need to have a loadbalancer to identify which instance of the microservice it needs to communicate
+        - Indirect communication
+            - communication through the message broker like Rabbit/Active MQ
+            - It’s  a non blocking call
+                - they can continue to do their operations till there is a response
+            - You don’t need a loadbalancer
+            - Two types
+                - queue model
+                    - you don’t need a loadbalancer, as it’s only at a time
+                - publish-subscribe model
+                    - you don’t need a loadbalancer as the broker will manage the loadbalancing
+        - API gateway
+            - acts as a gateway to other services
+            - Needs an authentication and authorization
+            - REST api
+            - json file format
+    - Event sink
+        - Event pahtway
+        - instance 1: microservice1 → instance 10: microservice2 → instance 25: microservice3
+    - Loggers
+        - Has all data logged
+        - Externalise the logs
+            - All the services are logged into an external logger
+            - It’s really difficult to find the errors through the logs of each instance of each microservices
+            - An external logger helps with this
+            - Examples
+                - ELK
+    - Scheduling
+        - There are processes that needs to be done before the client requests it
+        - Scheduler can be used to set up processes like that and  it will execute these processes before the client requests it
+        - The example can be something simple like updating out of stock products before the customer searches for the product

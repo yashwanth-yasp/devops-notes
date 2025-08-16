@@ -1,0 +1,25 @@
+- excel sheet vvimp, vilas repo vvimp
+- git
+    - if no browser what about PAT?
+- docker
+    - everything
+    - docker volumes, networking
+- kubernetes
+    - everything
+    - kubernetes hpa, network policies etc
+- Terraform
+    - vpc, subnets, ec2 security groups
+    - IaC best practices like state managemnent and modularity
+- CI/CD and DevSecOps
+    - React and Spring Boot
+    - Trivy for SCA, sonarqube/eslint for SAST or a simulated DAST scan
+- Monitoring and Alerting with Promethus & grafana
+    - for eks cluster
+- AI in Lanchain with Bedrock
+    - query eks cluster info using llms
+
+- High priority
+    - docker
+    - kubernetes
+    - llms aws bedrock
+- More when and why than how
