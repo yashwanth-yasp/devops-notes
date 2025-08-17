@@ -1,2 +1,4 @@
 - How git works internally?
--
+  - refer git-internals.md
+- <caps theorem>
+  - The CAP theorem states that distributed databases can have at most two of the three properties: consistency, availability, and partition tolerance. As a result, database systems prioritize only two properties at a time.
