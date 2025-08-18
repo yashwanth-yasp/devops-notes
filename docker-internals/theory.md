@@ -1,4 +1,11 @@
 
+- Main internals needed
+  - Images
+  - Containers 
+  - Volumes
+  - Networking
+
+
 - Docker is a process in the host machine, so how does it run a process inside it?
   - Every process inside the container is also a process in the host machine 
   - if you do ps -ef in the host machine, you will be able to see a process for each of the containers 

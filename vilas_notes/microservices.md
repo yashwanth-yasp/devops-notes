@@ -18,12 +18,12 @@
             - If you deposit money in the account and it uses eventual consistency, then it might be a problem as immediate consistency is really important
         - A good example of Eventual consistency would be something where an e-commerce app has an order placed, then it will eventually sync the data from frontend service to other services but it will say the order is placed in the frontend
     - Microservice to Microservice communication
-        - Direct communication
+        - Direct communication (synchronous communication)
             - directly communicate with the service
             - It’s a blocking call
                 - It waits till the response comes
             - You need to have a loadbalancer to identify which instance of the microservice it needs to communicate
-        - Indirect communication
+        - Indirect communication (asynchronous communication)
             - communication through the message broker like Rabbit/Active MQ
             - It’s  a non blocking call
                 - they can continue to do their operations till there is a response

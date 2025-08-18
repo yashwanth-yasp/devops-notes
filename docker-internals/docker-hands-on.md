@@ -5,5 +5,5 @@
   - when you start a container, the process id 1 would be whatever the image builder has decided 
   - if it's not mentioned it will be whatever the user says
   - writeable layer is in overlay2
-  - writable layer can be found in graph driver section of container inspect 
-  - i 
+  - writable layer can be found in graph driver section of container inspect
+
