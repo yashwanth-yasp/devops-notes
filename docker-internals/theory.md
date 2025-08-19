@@ -1,9 +1,9 @@
 
 - Main internals needed
-  - Images
-  - Containers 
-  - Volumes
-  - Networking
+  - Images [images](/docker-internals/docker_images.md)
+  - Containers [containers](/docker-internals/theory.md)
+  - Volumes [volumes](/docker-internals/volumes.md)
+  - Networking [networking](/docker-internals/networking.md)
 
 
 - Docker is a process in the host machine, so how does it run a process inside it?
@@ -19,3 +19,4 @@
   - this is because, whatever you are doing get persisted by default
   - when you make changes to teh container, the image is not written cause it is read only, so it is not stored in the image
   - docker has a folder called the writeable layer 
+

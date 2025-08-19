@@ -54,4 +54,33 @@
 - This can be tested by creating a mysql database in the container and crashing it and then checking it in the local machine, the database would still be present, the folder used is `/var/lib/mysql` as all the sql metadata is stored in that folder by default
 - that folder from the container is bound to some folder in the host machine
 - reference - [link](https://github.com/vilasvarghese/docker-k8s/blob/master/dockerfiles/frontEndAndBackEnd/webfrontend-mysqldb/instructions.txt)
+- The disadvantage with bind mount is that there is a security risk cause you can attach the container to any point in the host machine
+- Critical folders like /proc can also be attached which is a security risk 
+
+## Volumes 
+
+- Volumes solve the issue of bind mounts by allowing the volumes to be made only in the docker root directory 
+- `docker run -v volume_name:/path-in-the-container nginx`
+- three parameters can be written 
+  - first is where on the host machine 
+  - second is where inside the container 
+  - third is access type 
+    - it can be read only (ro) 
+    - or it can be read write (rw)
+- The slash after -v is what docker uses to differentiate between a bind mount and a volume 
+- The only parameter that is mandatory is the second paramerter, so if you see only one parameter, it is the path in the container 
+- In this case, the first parameter is not present, meaning the volume name or the host path is not mentioned, so the container creates a volume with a random name, this is called **anonymous volumes**
+- If you give the volume a name, it is a **named volume**
+- There is a command in the Docker Image called VOLUME
+- So when you are creating a container from an Image which has a VOLUME defined, the container will have an anonymous volume attached 
+
+## tmpfs
+
+- Not supported in windows, only supported in linux
+- Special type of volume and is also supported by kubernetes 
+- when you attach a tmpfs to a container, it will only stay till the containers is present 
+- It is used for temporary storage 
+- When you add more data, the writable layer gets big and that will slow it's runtime down when you stop and start that container 
+- Ex: Can be used as a temporary download folder in the example of a container downloading a database and storing it in the local database 
+- `docker run --mount type=tmpfs source destination nginx`
 
