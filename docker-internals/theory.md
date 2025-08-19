@@ -3,7 +3,7 @@
   - Images [images](/docker-internals/docker_images.md)
   - Containers [containers](/docker-internals/theory.md)
   - Volumes [volumes](/docker-internals/volumes.md)
-  - Networking [networking](/docker-internals/networking.md)
+  - Networking [networking](/docker-internals/networking-basics.md)
 
 
 - Docker is a process in the host machine, so how does it run a process inside it?

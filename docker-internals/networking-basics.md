@@ -1,0 +1,24 @@
+
+- IP Address
+  - A unique routable address given to a device in a network which follows IP protocol
+- Ethernet Card
+  - Ethernet card is a crad in the computer that allows a lan cable to connect to it, whose other end is connected to a router or a switch which connects it to the network 
+- Ethernet Cable 
+  - the cable that is connects a machine's ethernet card to switch 
+- NATing
+  - NATing modifies the from address of a machine 
+  - The from address is changed cause, if I am reaching something out of the network, I reach out the switch, the swith fails internal communication and hits the default route gateway, now, only switch knows the machine, because the gateway only knows the switch and that's why the from address is changed from the machine to the switch
+  - The way it finds it back the machine is that it has something listening in the switch blocks something like a thread for that request, and when the response comes back, it comes to the thread and this thread is bound to the requesting machine or switch and it forwards to it 
+  - There is an attack called Long Polling Attack which uses this as a flaw and slows down the response from multiple faulty machines which will take up all threads and slow down the application and not give space for geniune connections 
+- Switch 
+  - A switch can connect to multiple devices using wifi or the lan cables 
+  - sending a message to a ip in the network 
+    - broadcasts to find out which device that ip belongs to 
+    - the device which gets the ip returns the message with it's mac 
+    - and then the switch adds it to it's route table 
+  - There is a default route in the switch, it sends this route the message when all inter-communication fails
+  - This default route is typically a gateway 
+  - If you wanna communicate with an ip in a different network, the switch tries to find it in it's network, if it can't it will try for the gateway and the gateway will find that ip 
+- Gateway
+  - Connects two different networks 
+- Subnetting

@@ -84,3 +84,5 @@
 - Ex: Can be used as a temporary download folder in the example of a container downloading a database and storing it in the local database 
 - `docker run --mount type=tmpfs source destination nginx`
 
+- `docker system prune` will prune everything other than volumes
+
