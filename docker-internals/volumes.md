@@ -1,3 +1,10 @@
+---
+date: 2025-08-21
+tags:
+  - ust
+  - devops
+  - docker
+---
 
 - Docker containers are ephemeral - they can die any time 
 - If you don't want docker containers to crash, attach volumes

@@ -1,3 +1,9 @@
+---
+tags:
+  - ust
+  - devops
+  - docker
+---
 
 - images are layered file system
 - image layers are stored in root directory overlay2

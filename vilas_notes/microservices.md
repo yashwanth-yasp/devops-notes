@@ -49,6 +49,7 @@
             - An external logger helps with this
             - Examples
                 - ELK
+                - Datadog(AI based)
     - Scheduling
         - There are processes that needs to be done before the client requests it
         - Scheduler can be used to set up processes like that and  it will execute these processes before the client requests it

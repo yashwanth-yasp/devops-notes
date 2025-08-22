@@ -1,3 +1,10 @@
+---
+date: 2025-08-21
+tags:
+  - ust
+  - devops
+  - kubernetes
+---
 
 - Pods are a group of one or more containers 
 - Properties

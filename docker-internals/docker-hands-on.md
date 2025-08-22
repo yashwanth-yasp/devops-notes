@@ -1,3 +1,10 @@
+---
+date: 2025-08-21
+tags:
+  - ust
+  - devops
+  - docker
+---
 
 - Docker by default only runs if the user is in the docker group 
 - If not go to root and run docker 
