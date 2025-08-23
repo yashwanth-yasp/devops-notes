@@ -153,7 +153,7 @@ brctl show
 - **How does ping work with docker container name?**
 - **What happens if two containers in different networks have the same name? Which one does DNS resolve?**
 - **How does Docker ensure two containers mounting the same volume don’t corrupt data?**
-- **What happens inside the Docker daemon when you `docker exec` into a running container?
+- **What happens inside the Docker daemon when you `docker exec` into a running container?**
 
 # Best Practices 
 
