@@ -20,6 +20,8 @@ A container in the context of software is ==a standardized unit of software tha
 
 ![[Pasted image 20250822210152.png]]
 
+(if the image doesn't load in markdown, it will be in the same folder, please refer to it)
+
 - when you run the docker run command, the client sends the command to docker daemon 
 - docker daemon calls the low level container runtime containerd 
 - containerd in turn calls runc 
@@ -112,6 +114,7 @@ docker inspect -f '{{.GraphDriver.Data.UpperDir}}' ovctr
 
 ![[docker-networking-flow.png]]
 
+(if the image doesn't load, it will be in the same demos folder, please refer to it)
 
 ```bash
 docker run -dit --name c1 alpine sh
