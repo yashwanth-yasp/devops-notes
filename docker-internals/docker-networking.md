@@ -6,7 +6,7 @@ tags:
   - docker
 ---
 
-![docker-network-flow-diagram](image.png)
+![docker-network-flow-diagram](docker-networking-flow.png)
 
 - Docker0 is a bridge network 
 - In host network

@@ -22,3 +22,5 @@ tags:
   - so instead of ADD, it is suggested to use RUN curl or RUN wget instead of ADD 
 - this allows combining run layers into other RUN commands to reduce the no of layers in the image
 
+
+
