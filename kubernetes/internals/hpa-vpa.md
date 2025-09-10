@@ -16,7 +16,6 @@ tags:
 - Cluster autoscaler 
   - when the node is reaching it's limit, you can invoke the CA to add machines 
 
-- HPA also has a controller which monitors a table for HPA and when the resource column exceeds a given limit, the HPA controller hits the replicaset to add more machines, which hits the replica set which hist the api server to add more pods 
+- HPA also has a controller which monitors a table for HPA and when the resource column exceeds a given limit, the HPA controller hits the replicaset to add more machines, which hits the replica set which hits the api server to add more pods 
 - When HPA is created, a metric server is created to monitor the pods 
-- yesṭeee
 

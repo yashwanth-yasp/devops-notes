@@ -12,7 +12,7 @@
         - Authorization → how much you are allowed in, basically the level of permissions you have
     - It is NOT OKAY to have multiple microservices talk with a single database
     - <caps theorem>
-    - Eventual consistency → Things are not immediately updated in multiple databases, but it will eventually be distributed (will there be any inconsistencies?)
+    -Eventual consistency → Things are not immediately updated in multiple databases, but it will eventually be distributed (will there be any inconsistencies?)
         - It will eventually get updated like product page and purchase page, the new product will eventually be updated to the purchase page
         - But it will not update immediately so there can be issues in some cases
             - If you deposit money in the account and it uses eventual consistency, then it might be a problem as immediate consistency is really important
@@ -41,7 +41,7 @@
     - Event sink
         - Event pahtway
         - instance 1: microservice1 → instance 10: microservice2 → instance 25: microservice3
-    - Loggers
+    - Loggers``
         - Has all data logged
         - Externalise the logs
             - All the services are logged into an external logger
@@ -54,3 +54,10 @@
         - There are processes that needs to be done before the client requests it
         - Scheduler can be used to set up processes like that and  it will execute these processes before the client requests it
         - The example can be something simple like updating out of stock products before the customer searches for the product
+
+
+- Cascading retries 
+	- If you have multiple microservices talking to each other and retry is present and the microservice at the lowest level is throwing an error, then we would have retries for each microservices at till point, which is way too many retries 
+- Solution 
+	- Circuit breaker 
+		- It has a certiain number of requests till which it doesn't bother to interfere, say 3 but after that it will check how many requests out of that succeded, depending on the percentage of failure, it would break the circuit and send the connection to itself in the hope that by the time the request to itself is processed, the other microservice might recover 

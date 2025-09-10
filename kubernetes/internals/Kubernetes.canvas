@@ -1,0 +1,43 @@
+{
+	"nodes":[
+		{"id":"b6a5c1db7642ffe6","type":"file","file":"UST/devops/kubernetes/internals/rbac.md","x":-124,"y":-1010,"width":400,"height":400},
+		{"id":"1811095bc9d33ce1","type":"text","text":"# Kubernetes","x":-437,"y":-160,"width":257,"height":60},
+		{"id":"99bcdf451b912acc","type":"text","text":"# Kubernetes Resources\n","x":-437,"y":100,"width":294,"height":100},
+		{"id":"ed602c43a5d87c36","type":"file","file":"UST/devops/kubernetes/internals/kubernetes _architecture.md","x":20,"y":-330,"width":400,"height":400},
+		{"id":"6f0d15eb20183671","type":"text","text":"# Kubernetes Services","x":-960,"y":-158,"width":373,"height":60},
+		{"id":"eae7476e405d934e","type":"file","file":"UST/devops/kubernetes/internals/scheduling.md","x":655,"y":-328,"width":400,"height":400},
+		{"id":"5f1cabfa3bd20524","type":"file","file":"UST/devops/kubernetes/internals/deployment.md","x":171,"y":609,"width":400,"height":400},
+		{"id":"b8df266d992e2dab","type":"file","file":"UST/devops/kubernetes/internals/pods.md","x":-1173,"y":609,"width":400,"height":400},
+		{"id":"c626ffabcdf74659","type":"file","file":"UST/devops/kubernetes/internals/stateful-set.md","x":-29,"y":1080,"width":400,"height":400},
+		{"id":"4ebd38c894ae8efc","type":"file","file":"UST/devops/kubernetes/internals/jobs.md","x":-943,"y":1080,"width":400,"height":400},
+		{"id":"80a47fcfa80a5e2a","type":"file","file":"UST/devops/kubernetes/internals/replica-set.md","x":-490,"y":680,"width":400,"height":400},
+		{"id":"3f33941decb63584","type":"file","file":"UST/devops/kubernetes/internals/hpa-vpa.md","x":692,"y":1109,"width":400,"height":400},
+		{"id":"107520c3298a8900","type":"file","file":"UST/devops/kubernetes/internals/probes.md","x":-1758,"y":1150,"width":400,"height":400},
+		{"id":"5f814c55c636516f","type":"text","text":"# Volumes","x":-703,"y":-424,"width":250,"height":60},
+		{"id":"1356e6db9851e3bb","type":"file","file":"UST/devops/kubernetes/internals/services.md","x":-1640,"y":-564,"width":400,"height":400},
+		{"id":"4e02ac2ac09257e8","type":"file","file":"UST/devops/kubernetes/internals/ingress.md","x":-1640,"y":-50,"width":400,"height":400},
+		{"id":"6184889b4f93a852","x":-280,"y":-1680,"width":400,"height":400,"type":"file","file":"UST/devops/kubernetes/internals/namespaces.md"},
+		{"id":"cfb6bd5f5f68c3ff","x":-1280,"y":-1560,"width":400,"height":400,"type":"file","file":"UST/devops/kubernetes/internals/helm.md"},
+		{"id":"a4c1ffeef93b582d","type":"file","file":"UST/devops/kubernetes/internals/volumes.md","x":-987,"y":-920,"width":400,"height":400}
+	],
+	"edges":[
+		{"id":"2272a7c71c88bed6","fromNode":"1811095bc9d33ce1","fromSide":"right","toNode":"ed602c43a5d87c36","toSide":"left"},
+		{"id":"5da2866f1c42ef9e","fromNode":"1811095bc9d33ce1","fromSide":"bottom","toNode":"99bcdf451b912acc","toSide":"top"},
+		{"id":"b65f8fbe2d907cc2","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"b8df266d992e2dab","toSide":"top"},
+		{"id":"929a0ec3bbd2220c","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"80a47fcfa80a5e2a","toSide":"top"},
+		{"id":"d280c3ff731d5cd3","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"5f1cabfa3bd20524","toSide":"top"},
+		{"id":"53d8aa702f738934","fromNode":"1811095bc9d33ce1","fromSide":"left","toNode":"6f0d15eb20183671","toSide":"right"},
+		{"id":"c8b1fe9ab6aec290","fromNode":"6f0d15eb20183671","fromSide":"left","toNode":"1356e6db9851e3bb","toSide":"right"},
+		{"id":"967612ec2c2695b5","fromNode":"ed602c43a5d87c36","fromSide":"right","toNode":"eae7476e405d934e","toSide":"left"},
+		{"id":"a0c1fcbdb6d1f289","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"c626ffabcdf74659","toSide":"top"},
+		{"id":"5027816e739bfb85","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"4ebd38c894ae8efc","toSide":"top"},
+		{"id":"ad7fac647a5104ed","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"3f33941decb63584","toSide":"top"},
+		{"id":"c248363e027e753b","fromNode":"99bcdf451b912acc","fromSide":"bottom","toNode":"107520c3298a8900","toSide":"top"},
+		{"id":"5d2be0ed941d8daf","fromNode":"1811095bc9d33ce1","fromSide":"top","toNode":"5f814c55c636516f","toSide":"bottom"},
+		{"id":"7d520fd273bbeeaf","fromNode":"5f814c55c636516f","fromSide":"top","toNode":"a4c1ffeef93b582d","toSide":"bottom"},
+		{"id":"af9663704621ab9d","fromNode":"1811095bc9d33ce1","fromSide":"top","toNode":"b6a5c1db7642ffe6","toSide":"bottom"},
+		{"id":"880237b82f8d5a39","fromNode":"6f0d15eb20183671","fromSide":"left","toNode":"4e02ac2ac09257e8","toSide":"right"},
+		{"id":"8daabe9aba278bae","fromNode":"1811095bc9d33ce1","fromSide":"top","toNode":"6184889b4f93a852","toSide":"bottom"},
+		{"id":"d833485514d97692","fromNode":"1811095bc9d33ce1","fromSide":"top","toNode":"cfb6bd5f5f68c3ff","toSide":"bottom"}
+	]
+}
