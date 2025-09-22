@@ -1,6 +1,6 @@
 {
 	"nodes":[
-		{"id":"74fdf57ac75f0cd1","x":-491,"y":1207,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/GAN.md"},
+		{"id":"74fdf57ac75f0cd1","type":"file","file":"UST/devops/ai-models-demo/GAN.md","x":-491,"y":1207,"width":400,"height":400},
 		{"id":"4ac798cfcb117d89","type":"file","file":"UST/devops/ai-models-demo/RAG.md","x":-544,"y":593,"width":400,"height":400},
 		{"id":"cabf69edecb78db8","type":"file","file":"UST/devops/ai-models-demo/Grok.md","x":1445,"y":-243,"width":400,"height":400},
 		{"id":"f937474398088dd2","type":"text","text":"# AI demo ","x":-640,"y":0,"width":180,"height":60,"color":"4"},
@@ -24,12 +24,12 @@
 		{"id":"33877b29f10f0cf0","type":"text","text":"# Embedding Models","x":153,"y":778,"width":307,"height":102},
 		{"id":"a7a3dfb6c6bbc9c3","type":"file","file":"UST/devops/ai-models-demo/Titan.md","x":1245,"y":900,"width":400,"height":400},
 		{"id":"7659a08a6978dc9e","type":"file","file":"UST/devops/ai-models-demo/AmazonQ.md","x":-2312,"y":119,"width":400,"height":400},
-		{"id":"2566ef1dfb6700a8","x":-1339,"y":-1209,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/Kubeflow.md"},
-		{"id":"bd70bd15653ae288","x":1445,"y":-960,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/Mistral.md"},
-		{"id":"c86c5b610aff073c","x":-1149,"y":1094,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/Small Language Models.md"},
-		{"id":"fa93bc18bc49134a","x":-2340,"y":-520,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/Amazon Kendra.md"},
-		{"id":"8b11812ffc6db376","x":1886,"y":-646,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/Llama.md"},
-		{"id":"4ef7381f4ec9cc62","x":1942,"y":6,"width":400,"height":400,"type":"file","file":"UST/devops/ai-models-demo/AWS forecast.md"}
+		{"id":"2566ef1dfb6700a8","type":"file","file":"UST/devops/ai-models-demo/Kubeflow.md","x":-1339,"y":-1209,"width":400,"height":400},
+		{"id":"bd70bd15653ae288","type":"file","file":"UST/devops/ai-models-demo/Mistral.md","x":1445,"y":-960,"width":400,"height":400},
+		{"id":"c86c5b610aff073c","type":"file","file":"UST/devops/ai-models-demo/Small Language Models.md","x":-1149,"y":1094,"width":400,"height":400},
+		{"id":"fa93bc18bc49134a","type":"file","file":"UST/devops/ai-models-demo/Amazon Kendra.md","x":-2340,"y":-520,"width":400,"height":400},
+		{"id":"8b11812ffc6db376","type":"file","file":"UST/devops/ai-models-demo/Llama.md","x":1886,"y":-646,"width":400,"height":400},
+		{"id":"4ef7381f4ec9cc62","type":"file","file":"UST/devops/ai-models-demo/AWS forecast.md","x":1942,"y":6,"width":400,"height":400}
 	],
 	"edges":[
 		{"id":"bcf8797442365b6e","fromNode":"f937474398088dd2","fromSide":"right","toNode":"627637524e14472e","toSide":"left"},

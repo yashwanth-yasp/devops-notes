@@ -1,0 +1,236 @@
+---
+date: 2025-09-20
+tags:
+  - ust
+  - devops
+  - docker
+  - kubernetes
+  - ai
+---
+# Docker
+
+## Dockerfiles
+
+# Kubernetes
+
+- Kubernetes is a **open-source system for automating deployment, scaling, and management of containerized applications**
+- **Kubernetes Architecture**
+	- **Master Node** 
+		- The master node is the control plane in k8s
+		- **Etcd**
+			- NoSQL database with all the information of the cluster in it 
+			- It is stored in key-value format
+			- etcd is designed to run on a cluster of multiple servers (nodes). It uses the **Raft consensus algorithm** to ensure that if some servers fail, the data remains safe and the cluster stays operational.
+			- A leader is elected among the nodes, and all changes go through that leader, which then replicates the data to the other nodes
+			- Whenever some command that creates stuff is run, the leader sends command to all the follower nodes to write it to the etcd, but the leader doesn't wait for all the nodes to send the acknowledgement, it will wait until (n/2 + 1) nodes send back the acknowledgement and send the success message, and it will continue to ping the temporarily slow and unavailable nodes.
+			- You can look at it in a way and say it's eventual consistency, but etcd is strongly consistent, it will immediately apply the changes to all the nodes, the quoram is for the speed of the response of the nodes itself. 
+			- Etcd master node "attempts" strong consistency and achieves it with a slight delay unlike eventual consistency in other applications like updating a profile picture which might take a lot more time.
+			- Clients can "watch" for changes on specific keys or directories. When a key is updated, etcd notifies the client. This is crucial for systems that need to react to state changes in real-time
+			- The data in etcd is not encrypted, it is present in plain text, but there is a way to encrypt using EncryptionConfig, you can create a encrptionconfig, add the way to encrypt it and what resources to encrpt (ex: secrets) and add it in the api-server manifest file, after the api-server restarts, it will start encrypting the secret data everytime it is created
+			- By default this doesn't encrypt the secrets that are already present in the etcd, it will only encrypt the new secrets, so to encrypt all of them you would need to recreate the secrets
+		- **API server** 
+			- The Kubernetes API Server is the central control plane component that acts as the main gateway to the entire cluster. It exposes a RESTful API that lets you query and manipulate the state of all Kubernetes objects. **All** actions in the cluster go through this single component.
+			- API server also authenticates (certificates, usually kubectl command sends it with the json) , authorizes (RBAC), use of admission controllers (mutating - changes the request or injects a sidecar; validating - simple validation like if the image if from the right registry) and validates (validates the command).
+			- Runs on 6443/TCP port
+		- **Scheduler**
+			- The Kubernetes Scheduler (`kube-scheduler`) is the control plane component responsible for a single, critical task: assigning newly created pods to the best possible node for them to run on.
+			- It works in two main phases 
+				- Filtering (Finding the valid nodes)
+					- In this first phase, the scheduler eliminates all the nodes that are not viable candidates to run the pod.
+					- Common filtering checks:
+						- Resource availability: Does the node have enough CPU and memory to satisfy the pods *requests*
+						- Node Selector/affinity: Does the node have the labels required by the pod's `nodeSelector` or `nodeAffinity` rules?
+						- Volume Availability: Can the volumes requested by the pod be mounted on this node? (For example, is a specific AWS EBS volume in the same availability zone as the node?)
+						- Taints and Tolerations: Does the pod have a "toleration" for the "taints" on the node?
+						- Pod Affinity/Anti-Affinity: Can the pod be placed on this node based on rules about co-locating with or separating from other specific pods?
+				- Scoring 
+					- Once the list of valid nodes is created, the scheduler's job is to pick the _best_ one. It does this by giving each valid node a score based on a set of active priority rules.
+					- Common scoring rules include:
+						- Least Requested Priority: Prefers nodes with more available resources. This helps to spread the load evenly across the cluster.
+						- Image Locality Priority: Prefers nodes that already have the container images the pod needs. This speeds up pod startup time as no image pulling is required.
+						- Pod Affinity/Anti-Affinity Priority: Gives a higher score to nodes that satisfy the pod's affinity ("try to run near these pods") or anti-affinity ("try to run away from these pods") preferences.
+						- Balanced Resource Allocation: Favors nodes where CPU and memory usage would be most balanced after the pod is scheduled.
+				- After a winning node is chosen in the scoring phase, the scheduler performs the final action, called **Binding**. It notifies the API Server that a decision has been made. This involves updating the pod object, setting its `.spec.nodeName` field to the name of the chosen node.
+				- Once the API Server records this binding, the **Kubelet** on the destination node sees that the pod has been assigned to it and begins the process of pulling images and starting the containers.
+				- If a high-priority pod is created and the scheduler can't find a valid node for it, **preemption** can occur. The scheduler can decide to **evict** one or more lower-priority pods from a node to free up enough resources to schedule the high-priority pod. This ensures that the most critical workloads can always run.
+				- *Taints and Tolerations*
+					- Taints and Tolerations are a Kubernetes mechanism that allows you to control which pods can be scheduled on which nodes
+					- Types of Taints
+						- NoSchedule
+							- This is the most common effect. It means that **no new pods** will be scheduled on the node unless they have a matching toleration. It does not affect pods that are already running on the node.
+						- PreferNoSchedule
+							- This is a "soft" version of `NoSchedule`. The scheduler will **try to avoid** placing pods without a matching toleration on the node, but it's not a strict requirement. If there are no other nodes available, the pod can still be scheduled on the tainted node.
+						- NoExecute
+							- This is the strongest effect. Not only will it prevent new pods from being scheduled, but it will also **evict any existing pods** running on the node that do not have a matching toleration.
+					- Taints also have labels uniquely identifying them, if a pod wants to have the toleration for that node, they need to have a toleration with that specific label, kinda like a simple name for the taint itself
+				- *Affinity*
+					- It allows you to express complex scheduling preferences and rules, such as "run this pod on a node with a GPU" or "don't run this pod on the same node as that other pod."
+					- Types of Affinity
+						- Node Affinity
+							- Node affinity controls which **nodes** a pod can be scheduled on, based on the node's labels
+							- `requiredDuringSchedulingIgnoredDuringExecution`
+								- This is a **hard requirement** or a "must." The pod will **only** be scheduled on a node if the rule is met. If no nodes match the rule, the pod will remain `Pending`. The "IgnoredDuringExecution" part means that if the node's labels change later, the pod won't be evicted.
+							- `preferredDuringSchedulingIgnoredDuringExecution`
+								- This is a **soft requirement** or a "nice-to-have." The scheduler will **try** to find a node that meets the rule, but if it can't, it will still schedule the pod on any available node. You assign a "weight" to each preference to determine which is more important.
+						- Pod Affinity and Anti-Affinity
+							- Pod affinity controls a pod's placement based on the **other pods** that are already running on a node
+							- Pod Affinity
+								- This is used to **co-locate** pods. It tells the scheduler to try to place a pod on a node that is already running other pods with specific labels.
+							- Pod Anti-Affinity
+								- This is used to **separate** pods. It tells the scheduler to avoid placing a pod on a node that is already running other pods with specific labels.
+							- Both Pod Affinity and Anti-Affinity come in the same "hard" (`requiredDuringScheduling...`) and "soft" (
+							- `preferredDuringScheduling...`) variations as Node Affinity.
+		- **Controller**
+			- A Kubernetes **Controller** is a core component that constantly watches the state of your cluster and works to make the _current state_ match the _desired state_. Each controller is a specialized automated process responsible for managing a specific resource, like Deployments, ReplicaSets, or Nodes.
+			- The Internal Mechanism 
+				- Watch phase
+					- An infromer watches the api-server for any new change 
+					- The api-server sends a notification to the informer when there is a change for that specific kind
+					- Then the informer updates the cache 
+				- Diff phase
+					- After updating the cache, the informer creates a function to do the actual work and adds it to the workqueue
+				- Act phase (Reconcilation Loop)
+					- The controller has one or more worker processes that constantly pull items from the Workqueue.
+					- It then runs its **reconciliation logic**. It compares the desired state (defined in the Deployment object) with the actual state of the cluster (by checking for corresponding ReplicaSets).
+					- It then makes a call to the api-server to either update or create a new replica set 
+					- And the api-server hits the informer of the replicaset
+			- The **`kube-controller-manager`** is a core control plane component that bundles all the individual controllers into a single binary and runs them as a single process.
+	- **Worker Node**
+		- **Kubelet**
+			- The **Kubelet** is the primary "node agent" that runs on every single node in a Kubernetes cluster. Its fundamental job is to ensure that containers described in pods are running and healthy on its node
+			- Out of the kube-system entities, this is only one which is a process and not a pod
+			- The Kubelet doesn't make any scheduling decisions. It simply watches the API server. When it sees a pod that has been bound to _its_ node, it springs into action and follows a specific lifecycle to bring that pod to life.
+			- Before starting any application containers, the Kubelet's first step is to create a "pod sandbox." This is the foundational environment for the pod.
+				- It uses the container runtime to set up basic pod's isolation
+				- It creates a network namespace and creates a small "pause" container to hold that namespace open
+				- And after the file system namespace is allocated, all the containers that come after that will have the same IP and network environment
+			- If the pod requests a volume, the Kubelet takes care of it.
+				- The Kubelet communicates with the CSI(Container Storage Interface) driver for the specific storage type (like AWS EBS or Ceph)
+				- The CSI driver is responsible for attaching the external storage volume to the node and mounting it into a directory that will be accessible to the pod's containers
+			- For each container in the pod, the Kubelet calls the container runtime to
+				- Pull the container image if it's not already on the node, create the container and start the containers main process
+			- It also has other reponsibilities after the pod has been created 
+				- It constantly reports the health of the node and the status of its running pods back to the API server's control plane.
+				- It is the Kubelet that executes the liveness and readiness probes you define in your pod spec, restarting containers that fail liveness checks and updating the pod's readiness status.
+				- It works with the container runtime to enforce the CPU and memory `limits` you've set, ensuring containers don't use more resources than they are allocated.
+				- It also restarts or per say replaces containers that crashes
+		- **Kube Proxy**
+			- `kube-proxy` is a network proxy and load balancer that runs on every node in a Kubernetes cluster. Its fundamental job is to make Kubernetes **Services** work
+			- It translates the virtual IP of a Service into real pod IPs and ensures that traffic sent to a Service is correctly routed to one of its backend pods.
+			- Think of it as the network traffic controller inside each node. It doesn't handle traffic between pods on the same node or traffic from a pod to the outside world. Its sole focus is implementing the Service abstraction.
+			- `kube-proxy` doesn't actually proxy traffic itself in the way a traditional proxy like Nginx does. Instead, it's a controller that configures the underlying networking subsystem of the host node.
+			- It can do this in one of several modes:
+				- Ip tables mode
+					- This is the default and most common mode. `kube-proxy` watches the API server for changes to Services and Endpoints. For each Service, it creates a set of **iptables rules** on the node.
+				- IPVS Mode
+					- IPVS (IP Virtual Server) is a high-performance load balancer built into the Linux kernel. In this mode, `kube-proxy` configures IPVS rules instead of `iptables`
+					- IPVS uses an in-kernel hash table to store its routing rules, which is much more efficient than traversing a long list of `iptables` rules
+				- UseSpace Mode (Legacy/Deprecated)
+					- This was the original mode and is no longer used. In this mode, `kube-proxy` would actually open a port on the node and act as a true proxy, forwarding traffic from the Service IP to the pod IP in userspace. It was reliable but added extra network hops and was much less performant.
+			- You can say that kube-proxy is a kind of daemonset as it lives on every node, including the master nodes 
+	- All the services mentioned in the worker node also live in master node, it is generally not said for the benifit of the explaination
+- **Kubernetes Networking**
+	- Kubernetes networking is built on a flat network model that revolves around a fundamental principle: **every pod gets its own unique IP address**, and all pods can communicate with each other directly using these IPs without needing NAT (Network Address Translation).
+	- **Container to Container Communicatio**n (inside the pod)
+		- All containers inside a single pod share the same network namespace.
+		- They communicate with each other using localhost
+	- **Pod-to-Pod Communication** (Inside a node)
+		- The request from one of the containers hit the eth0 of the pod and the pod wil forward it to it's default gateway, which is the `cbr`, the custom bridge of the node which will forward the request to the pod inside the node
+	- **Pod-to-Pod Communication** (Across Nodes)
+		- This is solved by a **CNI plugin** which typically creates an **overlay network**.
+		- Kubernetes doesn't handle networking itself. It delegates the task to a CNI plugin like Flannel, Calico, or Weave Net.
+		- The CNI plugin creates a virtual network that spans all nodes in the cluster and sits on top of the physical network.
+		- When Pod A sends a packet to Pod B on another node, the CNI plugin on Node 1 **encapsulates** the original packet (Source: `10.1.1.2`, Dest: `10.1.2.2`) inside a new packet. This outer packet is addressed from Node 1's IP to Node 2's IP.
+		- The CNI plugin on Node 2 receives the packet, **decapsulates** it to reveal the original packet, and forwards it to Pod B.
+	- **Pod-to-Service Communication**
+		- When you send traffic to a Service's `ClusterIP`, `kube-proxy` intercepts it. It uses the node's underlying networking subsystem (`iptables` or `IPVS`) to randomly pick one of the healthy backend pods for that Service and changes the packet's destination IP to that pod's real IP.
+		- If it's a service name, the request is forwarded to the coredns pod which will act as a reverse proxy dns server
+- **Kubernetes Volumes**
+	- The kubelet contacts the CSI (Container Storage Interface) to make api calls to the Cloud provider to attach the cloud storage to the node VM and then mounts that directory on the host
+	- Types
+		- emptyDir
+			- A simple, empty directory created on the host node when a pod is scheduled. It's used for temporary scratch space or for sharing data between containers in the same pod. The data is deleted forever when the pod is removed from the node.
+		- hostPath
+			- Mounts a specific file or directory from the host node's filesystem directly into a container. This is useful for accessing system-level resources but should be used with caution as it can create security risks
+		- configMap / secret
+			- Used to mount configuration files or secrets as read-only files into a container's filesystem, allowing you to decouple configuration from your container image.
+		- persistentVolumeClaim
+			- This is the most common and powerful type for persistent data. Instead of defining a specific storage type (like `awsElasticBlockStore`), the pod "claims" a piece of storage with certain characteristics (e.g., "I need 10Gi of fast storage"). An administrator pre-provisions a `PersistentVolume` (PV) that can satisfy this claim, or a `StorageClass` can dynamically provision it. This abstracts the underlying storage from the application.
+			- AccessModes
+				- Read Write Many 
+					- All pods can read and write
+				- Read Only Many
+					- All pods can read
+				- Read Write Once 
+					- All pods in the same node as the first pod that bound to it can read and write 
+				- Read Write Once Pod
+					- Only the first pod that bound to it can read and write 
+		- persistentVolume
+			- A `PersistentVolume` is a piece of storage in the cluster that has been provisioned by an administrator or dynamically provisioned by a `StorageClass`. It is a cluster resource, just like a CPU or a node. It contains the details of the actual storage implementation, such as an AWS EBS volume, an NFS share, or a Google Persistent Disk.
+		- Storage Class
+			- A `StorageClass` provides a way for administrators to define different "classes" of storage. It acts as a template or blueprint for creating new `PersistentVolume`s when a user requests them. It specifies which provisioner to use (e.g., `ebs.csi.aws.com`) and what parameters to use when creating the storage (e.g., `type: gp3`).
+		- Types of Provisioning 
+			- Static Provisioning
+				- The admin manually creates a pv for the pvc to bind to 
+			- Dynamic Provisioning 
+				- k8s looks for a pv to bind, if it isn't present it looks for the storage class assigned and the storage class will create a pv according to it's config for the pvc to bind to 
+- **Pods** are a group of one or more containers 
+	- Smallest deployment unit in k8s
+	- Pods are colocated and coscheduled
+		-  Co-located - Containers of a single pod will always run on the same machine 
+		- Co-scheduled - All the Containers in a pod will start at the same time 
+	- Containers in a pod share the same network space and filesystem space 
+		- This doesn't mean that all containers in a pod have the same mnt namespace, they by default have different namespaces including mnt namespaces like normal containers but the mnt namespace is built on the pod's underlying storage which is common to all containers, that's why it's called they share a filesystem space  
+		- But this is the opposite in the case of network space, all containers don't have thier own ip, they all see only one eth0, they communicate with each other using localhost. Both are just like processes in a single machine. 
+		- when you run `kubectl run ydgpod --image=nginx`
+		  - kubectl does a REST api request to the api server 
+		    - kubectl will convert the command to json format and send it to the api server 
+		    - it also sends the certificate 
+		      - the certificate is for authentication and authorization that the api-server does 
+		  - api-server 
+		    - It will get the request and does authentication, authorization and validation (checking if the request is valid, like request count check etc) and adds the json to the etcd 
+		  - kube-scheduler 
+		    - as soon as something is added to etcd, scheduler will come in and finds the best node to run this on and pings api-server to update it in etcd 
+		  - api-server 
+		    - then api-server will contact the kubelet of the node given by the scheduler 
+		  - the kubelet 
+		    - kubelet will hit the containerd or crio to create the container
+		- If at any point a container goes down, kubelet fixes it locally and it **replaces** the container with a new container
+		 - and it will immediately ping the api-server that container went down and it fixed it
+- **Replicasets**
+	- `kubectl create rs ydgreplica --image=nginx --replicas=3`
+	- A **ReplicaSet** is a fundamental Kubernetes object whose single purpose is to ensure that a specified number of identical pod replicas are running at all times.
+	- The replica set controller constantly runs the reconcilation loop to keep the no of pods in the desired state
+- **Deployments**
+	- A Kubernetes **Deployment** is a high-level object that provides declarative updates for Pods and ReplicaSets. Its primary job is to manage the lifecycle of your application, allowing you to seamlessly perform rolling updates and rollbacks with zero downtime.
+	- Deployment doesn't manage pods, it manages replicasets and the replicasets themselves manage pods
+	- The `maxSurge` setting determines how many _extra_ pods are allowed to exist above the desired replica count during the update. For example, if you have 3 replicas and `maxSurge` is 1, the total number of pods can temporarily go up to 4.
+	- The `maxUnavailable` setting determines how many pods are allowed to be offline during the update. For example, if you have 3 replicas and `maxUnavailable` is 1, the number of available pods will never drop below 2.
+	- Deployments have rollout history for each versions and you can rollback whenver you need.
+	- Canary deployment
+		- The new version is sent to a small percentage of the crowd
+	- Blue Green deployment
+		- In this strategy, you have two identical environments ("blue" for the current version and "green" for the new version). Traffic is switched from blue to green all at once.
+- **Services**
+	- A Kubernetes **Service** is an object that provides a stable, unified endpoint to access a group of pods. Since pods are ephemeral and their IP addresses change, a Service gives you a single, reliable address that automatically load-balances traffic to the correct, healthy pods.
+	- Types of Services
+		- ClusterIP
+			- It exposes the Service on an internal-only IP address that is only reachable from within the cluster
+		- NodePort
+			- This exposes the Service on a static port on **each node's** IP address. A `NodePort` service is accessible from outside the cluster by making a request to `<Node-IP>:<NodePort>`. Kubernetes automatically creates a `ClusterIP` service that the `NodePort` service routes to
+		- LoadBalancer
+			- This is the standard way to expose a service to the internet in a cloud environment. It automatically creates a `NodePort` and a `ClusterIP` service, and then asks the underlying cloud provider (like AWS or Google Cloud) to create and configure an external load balancer that points to the `NodePort` on all your nodes.
+		- ExternalName
+			- This type is a special case and doesn't involve any pods. It acts as a simple CNAME redirect, mapping a service name within the cluster to an external DNS name. When you try to access the service, the cluster's DNS returns the external name instead of a `ClusterIP`.
+- **Ingress**
+	- An **Ingress** is a Kubernetes object that provides a smart, flexible way to route external HTTP and HTTPS traffic to services within your cluster. It acts as an API gateway or an application layer (L7) load balancer, allowing you to define routing rules based on hostnames or URL paths
+	- The key thing to understand is that the Ingress object itself is just a set of rules; it doesn't do anything on its own. It requires another component, an **Ingress controller**, to actually implement those rules.
+	- The Ingress controller is the actual engine that makes the Ingress rules work. It's a pod (or set of pods) running a reverse proxy and load balancer, such as NGINX, HAProxy, or Traefik. It is **not** part of the standard Kubernetes installation; you must install it separately.
+	- Ingress internally creates a loadbalancer if run on a cloud environment
+	- End to End flow
+		- The request hits an external load balancer (typically a `LoadBalancer` service that exposes the Ingress controller).
+		- The load balancer forwards the traffic to a `NodePort` on one of the nodes where an Ingress controller pod is running.
+		- The Ingress controller (the NGINX proxy) receives the request. It inspects the `Host` header and the URL path.
+		- It looks at the configuration that it built from the Ingress objects and finds a matching rule.
+		- It then forwards the request to the `ClusterIP` of the correct backend `Service`, which in turn sends it to one of the healthy backend pods.
+	- 

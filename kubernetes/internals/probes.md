@@ -24,3 +24,11 @@ tags:
 			- Readiness probe waits 
 		- Startup 
 			-  Statrtup probe verifies whether the application within a container is started. 
+
+|                   |                                                                                                 |                                                                                     |                                                       |
+| ----------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Feature           | Startup Probe                                                                                   | Liveness Probe                                                                      | Readiness Probe                                       |
+| Primary Goal      | Checks if the application has finished starting up.                                             | Checks if the application is still running (alive).                                 | Checks if the application is ready to accept traffic. |
+| When it Runs      | Runs only at the beginning of the container's lifecycle. It is disabled as soon as it succeeds. | Runs continuously throughout the container's life after the startup probe succeeds. | Runs continuously throughout the container's life.    |
+| Action on Failure | Restarts the container based on the pod's restart policy.                                       | Restarts the container.                                                             | Stops sending traffic to the container.               |
+

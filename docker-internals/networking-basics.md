@@ -9,7 +9,7 @@ tags:
 - IP Address
   - A unique routable address given to a device in a network which follows IP protocol
 - Ethernet Card
-  - Ethernet card is a crad in the computer that allows a lan cable to connect to it, whose other end is connected to a router or a switch which connects it to the network 
+  - Ethernet card is a card in the computer that allows a lan cable to connect to it, whose other end is connected to a router or a switch which connects it to the network 
 - Ethernet Cable 
   - the cable that is connects a machine's ethernet card to switch 
 - NATing

@@ -29,6 +29,6 @@ tags:
   - the kubelet 
     - kubelet will hit the containerd or crio to create the container
 
-- If at any point a container goes down, kubelet fixes it locally 
-- and it will immediately ping the api-server that container went down and it fixed it
+- If at any point a container goes down, kubelet fixes it locally and it **replaces** the container with a new container
+ - and it will immediately ping the api-server that container went down and it fixed it
 

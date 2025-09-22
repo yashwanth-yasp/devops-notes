@@ -17,7 +17,7 @@ tags:
 - copy and ADD are similar, can be used to copy stuff from host machine to the image in a Dockerfile
   - ADD can also be used for downloading something from the internet 
   - copy only copies from the local machine
-  - but ADD is not advised cause it cannot be hacked to download a file 
+  - but ADD is not advised cause it can be hacked to download a file 
   - If copy cannot download from internet, there is no vulnerability 
   - so instead of ADD, it is suggested to use RUN curl or RUN wget instead of ADD 
 - this allows combining run layers into other RUN commands to reduce the no of layers in the image

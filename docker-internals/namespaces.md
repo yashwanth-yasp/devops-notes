@@ -25,5 +25,5 @@ tags:
 - So docker uses this linux feature to create namespaces to get independant file structure, network space etc. 
 - And yeah docker natively runs only on linux machines 
 - Docker uses linux cgroups to monitor the resources used by a container because it is technically a process and shuts down something if it exceeds the limit they set. 
-
+- Process isolation is a psuedo isolation as we can see the container processes  running in the host machine
 
