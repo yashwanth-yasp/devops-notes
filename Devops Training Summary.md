@@ -7,9 +7,172 @@ tags:
   - kubernetes
   - ai
 ---
+# Git 
+
+- Git basics
+- Gitflow vs Trunk
+	- **Gitflow:** A structured branching model that uses multiple long-lived branches: `main` (for production releases), `develop` (for integrating features), and supporting branches for features, releases, and hotfixes. It's well-suited for projects with scheduled, versioned releases.
+	- **Trunk**: A simpler model where all developers work on a single main branch (the "trunk," usually `main` or `master`). Developers create short-lived feature branches, integrate their changes into the trunk frequently, and rely on feature flags and robust automated testing to maintain stability. This model is ideal for teams practicing continuous integration and deployment
+- Rebase vs. Merge
+	- **`git merge`:** This command takes the commits from a feature branch and combines them with a target branch (like `main`) by creating a new, single "merge commit." This preserves the exact history of the feature branch and creates a graph-like history that shows where branches were merged.
+	- **`git rebase`:** This command takes the commits from a feature branch and "replays" them, one by one, on top of the target branch. This rewrites the commit history to create a clean, linear sequence of commits.
+- Conflict resolution
+	- A conflict occurs when you try to merge or rebase branches that have competing changes—for example, when the same lines in the same file have been modified on both branches. Git cannot automatically decide which change is correct.
+- Pre-commit hooks
+	- These are scripts that Git automatically runs _before_ creating a commit. They are used as a safety net to check your code for issues like linting errors, formatting problems, or forgotten debug statements, preventing bad code from ever entering the repository.
+- Pull Request (PR) Lifecycle
+	- A developer creates a feature branch and pushes commits to it.
+	- They open a Pull Request on a platform like GitHub or GitLab.
+	- Team members **review the code**, add comments, and request changes.
+	- Automated checks (like tests and builds) run.
+	- The developer makes revisions based on the feedback.
+	- The PR is approved and **merged** into the main branch.
+- Code review practices
+	- The goal of a code review is to improve code quality and share knowledge. Good practices include keeping PRs small and focused, being constructive with feedback, asking questions rather than making demands, and automating style checks with a linter.
+
+# Github Actions
+
+- **GitHub Actions** is a powerful and flexible automation platform built directly into GitHub. It allows you to automate your software development workflows, with the most common use case being **CI/CD (Continuous Integration / Continuous Deployment)**.
+- A CI/CD pipeline is a series of automated steps that take your code from a commit all the way to a production release.
+	- Setup Environment & Checkout Code
+		- **Setup:** The workflow runner (a fresh virtual machine, usually running Ubuntu) is provisioned.
+		- **Checkout:** The first step in your job is almost always `actions/checkout@v3`. This is a pre-built "action" that checks out a copy of your repository's code onto the runner so the subsequent steps can work with it.
+	- Linting
+		- Linting is the process of running a static code analysis tool to check for stylistic errors, programming mistakes, and adherence to code quality standards. This is a quick first check to ensure code consistency.
+	- SCA (Software Component Analysis)
+		- Modern applications are built using many open-source libraries. SCA tools scan your project's dependencies to find known vulnerabilities in the third-party packages you are using. This is crucial for supply chain security.
+	- SAST (Static Application Security Testing)
+		- SAST tools scan your source code _before_ it's compiled or run to find potential security vulnerabilities, such as SQL injection flaws or insecure code patterns. GitHub has a built-in SAST tool called CodeQL that can be easily integrated.
+	- Build & Unit Test
+		- **Build:** Your code is compiled or transpiled into an executable artifact. For a Node.js app, this might involve running `npm install` and `npm run build`.
+		- **Unit Test:** These are fast, small tests that verify individual "units" or functions of your code in isolation to ensure they work as expected.
+	- Docker Image Build, Scan, and Push
+		- build scan and push
+		- **Image Scan:** Before pushing, the final Docker image is scanned for vulnerabilities in its OS packages and dependencies.
+	- Deploying to a Kubernetes Cluster
+		- deploy
+	- DAST (Dynamic Application Security Testing)
+		- DAST is performed _after_ deployment. It tests the running application from the outside, trying to find vulnerabilities by simulating real-world attacks. This is often done in a staging environment.
+- Artifacts
+	- An **artifact** is a file or collection of files that are produced during a workflow run. You can use artifacts to share data **between jobs** in the same workflow. For example, the `build` job can upload the compiled application as an artifact, and a later `deploy` job can download that artifact to deploy it.
+- Caching
+	- Downloading dependencies (like npm packages or Maven JARs) on every run can be slow. Caching allows you to save these dependencies after the first run. On subsequent runs, the workflow can restore the cache instead of re-downloading everything, making your pipeline significantly faster.
 # Docker
 
+- **Docker Architecture**
+	- Docker follows client server architecture
+	- **The Docker Client (`docker` CLI):** This is the command-line tool you interact with in your terminal. Its job is to take your commands, package up any necessary information, and send it to the daemon via an API.
+	- **The Docker Daemon (`dockerd`):** This is the background service that does all the heavy lifting. It listens for API requests from the client and manages images, containers, networks, and volumes.
+- **Images**
+	- A Docker image isn't a single, monolithic file. Internally, it's a clever collection of **read-only layers** stacked on top of each other, all tied together by a manifest file. This layered architecture is what makes images so efficient and fast.
+	- Each instruction in a `Dockerfile` (like `FROM`, `RUN`, `COPY`) creates a new layer. Each layer only contains the changes from the layer before it—the files that were added, modified, or deleted.
+	- The Manifest and Configuration
+		- This is the image's table of contents. It's a JSON file that lists all the layers that make up the image (identified by their unique SHA256 hash) and points to a configuration file
+		- This JSON file contains metadata about the image, such as the command to run when a container starts (`Cmd`, `Entrypoint`), environment variables (`ENV`), and exposed ports (`EXPOSE`)
+		- That is why we say metadata commands don't contribute to the size of the image as it is stored in the manifest json file
+	- Docker uses copy-on-write strategy to save space
+		- **Reading:** If a container needs to read a file, it reads it directly from the underlying read-only image layers. This is fast and efficient.
+		- **Writing:** If a container needs to modify a file, the file is first copied from its read-only layer up into the thin writable layer, and the changes are made there. The original file in the image remains untouched.
+		- **Deleting:** If a container deletes a file, a "whiteout" file is created in the writable layer, which simply hides the file from the layers below. The file isn't actually deleted from the read-only image.
+	- What happens when you do `docker build .`
+		- The **Docker client** sees the `.` and packages the entire current directory (the **build context**) into a compressed tarball.
+		- The client then sends this tarball to the **Docker daemon** through the Docker Engine API.
+		- The docker daemon does receives the compressed tarball of your project files (the build context) from the Docker client. It unpacks these files into a temporary directory so it can access them during the build.
+		- The daemon reads your Dockerfile from top to bottom, validating the syntax and ensuring the instructions are in a valid order (e.g., that it starts with a `FROM` instruction).
+		- Sequential Execution
+			- The daemon maintains a cache of image layers. Before executing an instruction, it checks if it has already built a layer for this exact instruction in a previous build. If the instruction and its context (e.g., the specific file being copied) are identical to a previous build, it finds a **cache hit**.
+				- **Cache Hit:** If a valid layer is found in the cache, the daemon skips executing the instruction and simply reuses the existing layer. This is why subsequent builds are often much faster.
+				- **Cache Miss:** If no valid layer exists, the daemon must do the work to create a new one.
+			- Creates a new layer (on cache miss)
+				- Takes the image built so far (up to the previous layer).
+				- Launches a temporary **intermediate container** from it.
+				- Executes the current instruction inside that container. For example, for a `RUN` command, it runs the command; for a `COPY` command, it copies the file from the build context into the container.
+				- After the command completes successfully, the daemon "commits" the changes to the temporary container's filesystem as a new, read-only layer with a unique SHA256 hash.
+			- Once all instructions have been executed, the daemon has a final stack of layers. It then:
+				- Creates a **manifest** and **configuration file** for the new image, which contains metadata from instructions like `CMD`, `ENTRYPOINT`, and `ENV`.
+				- Assigns the human-readable **tag** you provided (e.g., `my-app:latest`) as a pointer to the final image's ID.
+			- Docker caches the **image layers**, which are the final, read-only result. The intermediate container is just the temporary "workshop" used to create that layer.
+		- Finally, the daemon cleans up by removing the temporary intermediate containers and the unpacked build context it used during the build process. The final result is a new, lean, layered image ready to be used.
+- **Containers**
+	- A Docker container is not a virtual machine. At its core, a running container is just a standard **Linux process** that is isolated from other processes using two powerful, built-in Linux kernel features: **Namespaces** and **Control Groups (cgroups)**.
+	- Docker uses a combination of namespaces to create this isolation:
+		- **PID Namespace:** Provides isolation for process IDs. Inside the container, your application thinks it's the first process (PID 1), with its own private process tree. It cannot see or affect processes outside its namespace.
+		- **NET Namespace:** Provides network isolation. A container gets its own private network stack, including its own IP address, routing table, and network interfaces. This is why a container can run a web server on port 80 without conflicting with a server on the host.
+		- **MNT Namespace:** Isolates the filesystem mount points. This allows each container to have its own root filesystem, starting from the Docker image, without seeing the host's filesystem.
+		- **UTS Namespace:** Isolates the hostname. This is why you can set a unique hostname for your container.
+		- **IPC Namespace:** Isolates inter-process communication resources.
+		- Docker by default doesn't create a user namespace for the container, so if you use root inside container then docker remaps it to the underlying UID0 which is the root user
+			- The only core difference is that the user inside the container is constricted by the namespace scope and also the constraints placed by docker itself
+		- **User Namespaces (userns-remap):** This feature allows the Docker daemon to map the `root` user inside a container to an unprivileged user on the host system. This means that even if a process inside the container has `root` privileges, it will not have `root` privileges on the host, significantly enhancing security.
+			- This also doesn't mean that it will remap liek this when I mention a `USER` in dockerfile, in that case it just creates a new user in the host machine with some different UID and uses that in the container, the remapping onlly happens if you explicitly do it 
+	- Resource Limiting via Control Groups (cgroups)
+		- While namespaces handle isolation, **cgroups** are what enforce resource limits. They are a kernel feature that allows you to allocate and limit the amount of hardware resources a process can use.
+	- The Filesystem: UnionFS and the Writable Layer
+		- A container's filesystem is created by taking the read-only layers of its **Docker image** and adding a thin, **writable layer** on top.
+		- refer image section for copy-on-write
+- **Volumes**
+	- A **Docker Volume** is the recommended mechanism for persisting data generated by and used by Docker containers. It's a directory managed by Docker on the host machine that is mounted into a container's filesystem.
+	- The primary purpose of a volume is to completely decouple the container's data from the container's lifecycle. Even if you stop, destroy, or rebuild a container, the data in the volume remains safe.
+	- tmpfs
+		- Creates a temporary volume for the container to store some temporary data that it doesn't want to persist
+		- This is done to make sure that the writable layer is not big
+		- A tmpfs mount inside a container is not bound to a specific directory on the host machine's filesystem.
+		- Instead, it exists entirely within the host machine's **memory (RAM)**.
+	- Bind Mount 
+		- Binds any directory from the host machine to a container
+		- This is risky as there is a chance to bind critical directories like `proc`
+	- Volumes 
+		- Made to compensate for Bind Mount, it binds to directories only in the docker subdirectory
+		- This is less risky
+		- Anonymous volumes
+			- no name 
+			- creates an anonymous volume when you mention `VOLUME` in dockerfile
+		- Named volumes 
+			- has names
+	- When you start a container and attach the volume, Docker tells the container runtime to create a **bind mount**. This is a Linux feature that makes a file or directory on the host (the volume directory) appear as if it's inside the container at the path you specify.
+- **Networking**
+	- Docker networking is a system that allows containers to communicate with each other, the host machine, and external networks. It uses a pluggable driver system, with each driver providing a different type of network isolation and functionality.
+	- Bridge Network (Default)
+		- This is the default network a container is connected to if you don't specify another one. It creates a private, internal network on the host machine.
+			- Docker creates a virtual bridge (like `docker0`) on the host. Each container on this network gets its own network namespace and a private IP address from the bridge's range (e.g., `172.17.0.2`). To communicate with the outside world, Docker uses **Network Address Translation (NAT)**, mapping the container's port to a port on the host machine.
+	- Host Network
+		- This mode removes network isolation between the container and the host machine.
+			- The container does not get its own network namespace. It shares the host's network stack completely. Any port a service in the container listens on is exposed directly on the host's IP address. There is no NAT or port mapping.
+			- When you need maximum network performance and are willing to sacrifice network isolation.
+	- Overlay Network (Docker Swarm)
+		- An overlay network creates a distributed, virtual network that "overlays" on top of the host networks. It allows containers on different hosts to communicate directly as if they were on the same private network. It achieves this by **encapsulating** the container-to-container traffic in a special packet format (like VXLAN) that can be routed across the physical network from one host's Docker daemon to another
+	- None Network
+		- This is the most isolated mode.
+		- The container gets its own network namespace but is not attached to any network. It has a `localhost` interface but no external network connectivity
+	- Other Features
+		- Automatic DNS and Service Discovery
+			- When you connect containers to a **user-defined network**, Docker provides an **embedded DNS server**.
+			- Each container can automatically find and communicate with other containers on the same network using their **container name** as a hostname.
+			- This is the foundation of **service discovery** in Docker. You don't need to hard-code IP addresses. Your `web-app` container can simply connect to `postgres-db` by its name, and Docker's DNS will resolve it to the correct container's IP address. This is a huge advantage over the default `bridge` network.
+			- `docker0` doesn't have dns and service discovery to allow backward compatibality
 ## Dockerfiles
+
+- A Dockerfile is a text file that contains a series of instructions on how to build a Docker image. It's a blueprint that automates the process of creating a lightweight, portable environment for your application.
+- **Each instruction in a Dockerfile creates a new, read-only layer** in the final image.
+- Instructions
+	- **`FROM`:** This must be the first instruction. It specifies the **base image** that your image will be built on top of. This becomes the first layer.
+	- **`RUN`:** Executes a command in a new layer. For example, `RUN apt-get update && apt-get install -y nginx` creates a layer containing the NGINX package.
+	- **`COPY` / `ADD`:** Adds files from your local machine into the image, creating a new layer with those files.
+		- All paths for instructions like `COPY` and `ADD` inside your Dockerfile are **always** relative to the root of the **build context**, regardless of where the Dockerfile itself is located.
+	- **`CMD` / `ENTRYPOINT`:** They set **metadata** in the image's configuration file, defining the default command that will be run when a container starts.
+- When you run `docker build .`, the `.` tells Docker to send the contents of the current directory to the Docker daemon. This is the **build context**. The `COPY` and `ADD` instructions can only access files within this context.
+	- So if you do `docker build .` you cannot do a command like `COPY ../file app/file` in the dockerfile as the daemon doesn't have the data outside that directory
+	- As **`COPY`** and **`ADD`** commands are relative to the builld context, you will have to modify it if you were to change the build location to the directory outside your main directory and you would also need to specify the path of the Dockerfile as docker looks for it in the root directory
+- Every instruction creates a new image layer **as long as** they make a change or contribute to a change in the file system 
+- We might think that as metadata arguments are stored in the manifest.json, docker might not create a layer for that, but that is partially inaccurate
+- Metadata Instructions That Create New Image Layers
+	- **ENV**: Each `ENV` instruction creates a new intermediate layer, just like `RUN` commands. Even if you unset the environment variable later, it persists in the layer where it was set [Build best practices: ENV](https://docs.docker.com/build/building/best-practices/#env).
+	- **CMD**: The `CMD` instruction is visible in the image history as a layer, but it is a metadata-only change and does not take up space other than the metadata itself [Storage drivers](https://docs.docker.com/engine/storage/drivers/#sharing-promotes-smaller-images).
+		- So that denotion in history as layer is for user information
+	- **LABEL**: Adding a `LABEL` creates a new layer
+- Metadata Instructions That Do NOT Create New Image Layers
+	- **ARG**: The `ARG` instruction does not create a new image layer. It defines build-time variables and impacts build caching, but is not persisted as a layer [Impact on build caching](https://docs.docker.com/reference/dockerfile/#impact-on-build-caching).
+	- **WORKDIR**: Not explicitly mentioned in the sources as creating a new layer, but typically, instructions that change the filesystem (like `COPY`, `RUN`, `ENV`) create layers, while those that only set metadata (like `WORKDIR`, `USER`, `EXPOSE`, `VOLUME`, `STOPSIGNAL`, `HEALTHCHECK`, `ENTRYPOINT`, `ONBUILD`, `SHELL`) do not. However, the sources do not provide a definitive list for all these instructions. (*this info is from docker docs*)
 
 # Kubernetes
 
@@ -25,7 +188,6 @@ tags:
 			- Whenever some command that creates stuff is run, the leader sends command to all the follower nodes to write it to the etcd, but the leader doesn't wait for all the nodes to send the acknowledgement, it will wait until (n/2 + 1) nodes send back the acknowledgement and send the success message, and it will continue to ping the temporarily slow and unavailable nodes.
 			- You can look at it in a way and say it's eventual consistency, but etcd is strongly consistent, it will immediately apply the changes to all the nodes, the quoram is for the speed of the response of the nodes itself. 
 			- Etcd master node "attempts" strong consistency and achieves it with a slight delay unlike eventual consistency in other applications like updating a profile picture which might take a lot more time.
-			- Clients can "watch" for changes on specific keys or directories. When a key is updated, etcd notifies the client. This is crucial for systems that need to react to state changes in real-time
 			- The data in etcd is not encrypted, it is present in plain text, but there is a way to encrypt using EncryptionConfig, you can create a encrptionconfig, add the way to encrypt it and what resources to encrpt (ex: secrets) and add it in the api-server manifest file, after the api-server restarts, it will start encrypting the secret data everytime it is created
 			- By default this doesn't encrypt the secrets that are already present in the etcd, it will only encrypt the new secrets, so to encrypt all of them you would need to recreate the secrets
 		- **API server** 
@@ -39,7 +201,7 @@ tags:
 					- In this first phase, the scheduler eliminates all the nodes that are not viable candidates to run the pod.
 					- Common filtering checks:
 						- Resource availability: Does the node have enough CPU and memory to satisfy the pods *requests*
-						- Node Selector/affinity: Does the node have the labels required by the pod's `nodeSelector` or `nodeAffinity` rules?
+						- Node affinity: Does the node have the labels required by the pod's `nodeAffinity` rules?
 						- Volume Availability: Can the volumes requested by the pod be mounted on this node? (For example, is a specific AWS EBS volume in the same availability zone as the node?)
 						- Taints and Tolerations: Does the pod have a "toleration" for the "taints" on the node?
 						- Pod Affinity/Anti-Affinity: Can the pod be placed on this node based on rules about co-locating with or separating from other specific pods?
@@ -48,7 +210,7 @@ tags:
 					- Common scoring rules include:
 						- Least Requested Priority: Prefers nodes with more available resources. This helps to spread the load evenly across the cluster.
 						- Image Locality Priority: Prefers nodes that already have the container images the pod needs. This speeds up pod startup time as no image pulling is required.
-						- Pod Affinity/Anti-Affinity Priority: Gives a higher score to nodes that satisfy the pod's affinity ("try to run near these pods") or anti-affinity ("try to run away from these pods") preferences.
+						- Pod Affinity/Anti-Affinity Priority: Gives a higher score to nodes that satisfy the pod's affinity ("try to run near these pods") or anti-affinity ("try to run away from these pods") preferences. 
 						- Balanced Resource Allocation: Favors nodes where CPU and memory usage would be most balanced after the pod is scheduled.
 				- After a winning node is chosen in the scoring phase, the scheduler performs the final action, called **Binding**. It notifies the API Server that a decision has been made. This involves updating the pod object, setting its `.spec.nodeName` field to the name of the chosen node.
 				- Once the API Server records this binding, the **Kubelet** on the destination node sees that the pod has been assigned to it and begins the process of pulling images and starting the containers.
@@ -115,7 +277,7 @@ tags:
 				- It works with the container runtime to enforce the CPU and memory `limits` you've set, ensuring containers don't use more resources than they are allocated.
 				- It also restarts or per say replaces containers that crashes
 		- **Kube Proxy**
-			- `kube-proxy` is a network proxy and load balancer that runs on every node in a Kubernetes cluster. Its fundamental job is to make Kubernetes **Services** work
+			- `kube-proxy` is a network proxy that runs on every node in a Kubernetes cluster. Its fundamental job is to make Kubernetes **Services** work
 			- It translates the virtual IP of a Service into real pod IPs and ensures that traffic sent to a Service is correctly routed to one of its backend pods.
 			- Think of it as the network traffic controller inside each node. It doesn't handle traffic between pods on the same node or traffic from a pod to the outside world. Its sole focus is implementing the Service abstraction.
 			- `kube-proxy` doesn't actually proxy traffic itself in the way a traditional proxy like Nginx does. Instead, it's a controller that configures the underlying networking subsystem of the host node.
@@ -143,7 +305,7 @@ tags:
 		- When Pod A sends a packet to Pod B on another node, the CNI plugin on Node 1 **encapsulates** the original packet (Source: `10.1.1.2`, Dest: `10.1.2.2`) inside a new packet. This outer packet is addressed from Node 1's IP to Node 2's IP.
 		- The CNI plugin on Node 2 receives the packet, **decapsulates** it to reveal the original packet, and forwards it to Pod B.
 	- **Pod-to-Service Communication**
-		- When you send traffic to a Service's `ClusterIP`, `kube-proxy` intercepts it. It uses the node's underlying networking subsystem (`iptables` or `IPVS`) to randomly pick one of the healthy backend pods for that Service and changes the packet's destination IP to that pod's real IP.
+		- When you send traffic to a Service's `ClusterIP`, `kube-proxy` intercepts it (for the benifit of explaination). It uses the node's underlying networking subsystem (`iptables` or `IPVS`) to randomly pick one of the healthy backend pods for that Service and changes the packet's destination IP to that pod's real IP.
 		- If it's a service name, the request is forwarded to the coredns pod which will act as a reverse proxy dns server
 - **Kubernetes Volumes**
 	- The kubelet contacts the CSI (Container Storage Interface) to make api calls to the Cloud provider to attach the cloud storage to the node VM and then mounts that directory on the host
@@ -233,4 +395,265 @@ tags:
 		- The Ingress controller (the NGINX proxy) receives the request. It inspects the `Host` header and the URL path.
 		- It looks at the configuration that it built from the Ingress objects and finds a matching rule.
 		- It then forwards the request to the `ClusterIP` of the correct backend `Service`, which in turn sends it to one of the healthy backend pods.
-	- 
+- **HPA**
+	- The **Horizontal Pod Autoscaler (HPA)** is a Kubernetes component that automatically scales the number of pod replicas in a Deployment, ReplicaSet, or StatefulSet based on observed CPU utilization, memory usage, or other custom metrics.
+	- Its purpose is to ensure your application has enough resources to handle the current load while also saving costs by scaling down when the load is low.
+	- Internals
+		- The HPA operates on a continuous **control loop** managed by the `kube-controller-manager`. This loop runs periodically (the default is every 15 seconds) and performs a three-step process: **Fetch, Calculate, and Execute**.
+		- Fetch: Getting the Metrics
+			- The HPA does **not** get metrics directly from the pods. It follows a decoupled architecture for efficiency and scalability
+				- The **Kubelet** on each node collects raw CPU and memory usage from its local pods.
+				- The **Metrics Server**, a cluster-wide aggregator, scrapes this data from all the Kubelets.
+				- The HPA controller queries the **Metrics Server's API** (via the main Kubernetes API Server) to get the aggregated metric value for the target resource (e.g., "what is the average CPU utilization across all pods in `my-deployment`?").
+		- Calculate: The Scaling Algo
+			- Once the HPA has the current metric value, it uses a simple ratio-based formula to calculate the desired number of replicas: `desiredReplicas = ceil[currentReplicas * ( currentMetricValue / desiredMetricValue )]`
+		- Execute: Applying the Scale 
+			- If the `desiredReplicas` count is different from the `currentReplicas`, the HPA makes a call to the Kubernetes API to update the `.spec.replicas` field on the target resource (e.g., the Deployment).
+			- The Deployment's controller then takes over, and its own reconciliation loop works to create (or terminate) pods to match this new desired replica count. The HPA also respects the `minReplicas` and `maxReplicas` you define, ensuring it never scales outside of your specified bounds.
+		- There are info about the nodes in the etcd and that's what scheduler uses when it pings the api-server but the thing is even that is not live data as the data stored there is only the difference between the last pod's requirements substracted from the actual available resources in that node.
+		- The pod metric data isn't stored in etcd cause it's too much and it keeps increasing as the no of pods increase, so the metric server is used
+		- The Horizontal Pod Autoscaler (HPA) communicates exclusively with the main **Kubernetes API Server**. The API Server then acts as a proxy, forwarding the request to the **Metrics Server**.
+- **VPA**
+	- The **Vertical Pod Autoscaler (VPA)** is a Kubernetes component that automatically adjusts the CPU and memory **requests** and **limits** for your pods, helping to "right-size" your applications.
+	- While the Horizontal Pod Autoscaler (HPA) scales out by adding more pods, the VPA scales **up** by giving individual pods more resources. Its primary goal is to optimize resource utilization and reduce costs by preventing you from over-provisioning your containers.
+	- **Core Components**
+		- **VPA Recommender:** This is the monitoring component. It continuously watches the historical and current resource usage of your pods and calculates recommended "target" values for their CPU and memory requests.
+		- **VPA Updater:** This is the active component. If it sees that a running pod's resource requests are significantly different from the recommended values, it will **evict** the pod.
+		- **VPA Admission Controller:** This is a webhook that intercepts new pod creation requests. When a pod is evicted by the Updater and recreated by its controller (like a Deployment or StatefulSet), the Admission Controller rewrites the pod's manifest, applying the new, optimized resource requests from the Recommender before the pod is scheduled.
+- **CA**
+	- The **Cluster Autoscaler (CA)** is a Kubernetes component that automatically adjusts the size of your cluster by adding or removing **nodes**. It works in conjunction with the HPA and VPA to ensure your cluster has enough capacity to run your workloads without wasting money on idle resources.
+	- The Cluster Autoscaler operates on a periodic control loop (typically every 10 seconds). In each loop, it scans the cluster and makes one of two main decisions: should it scale up or should it scale down?
+	- How a Scale-Up Works
+		1. **Trigger:** The primary trigger for a scale-up is the presence of **unschedulable pods**. The Cluster Autoscaler constantly looks for pods in the `Pending` state that cannot be scheduled because of insufficient resources (CPU or memory).
+		2. **Simulation:** When it finds unschedulable pods, it doesn't just add a random node. Instead, it runs a **simulation**. It checks all the different "node groups" available from the cloud provider (e.g., different instance types or availability zones). It simulates scheduling the pending pods onto a new, hypothetical node from each of these groups to see if it would solve the problem.
+		3. **Decision:** It chooses the node group that would be the most efficient fit for the pending pods and makes an API call to the cloud provider to provision a new node.
+		4. **Hand-off:** Once the new node joins the cluster, the standard `kube-scheduler` sees it and schedules the pending pods onto it. The Cluster Autoscaler's job is done.
+	- How a Scale-Down Works
+		1. **Trigger:** After checking for scale-up conditions, the Cluster Autoscaler looks for nodes that are underutilized and could be removed. A node is a candidate for removal if the sum of its pods' CPU and memory **requests** is below a certain threshold (e.g., 50%) for a sustained period (e.g., 10 minutes).
+		2. **Simulation and Safety Checks:** Before removing a node, the autoscaler performs a critical safety check. It simulates what would happen if the node were removed and checks if all the pods currently running on that node could be safely rescheduled onto other available nodes in the cluster. It respects rules like **Pod Disruption Budgets (PDBs)**, ensuring that the eviction won't cause an outage for your application.
+		3. **Eviction and Termination:** If the simulation shows that the pods can be safely moved, the Cluster Autoscaler first taints the node to prevent new pods from being scheduled on it. Then, it gracefully **drains** the node by evicting all the pods. Once the node is empty, it makes an API call to the cloud provider to terminate the virtual machine.
+- **Network Policies**
+	- A **Network Policy** in Kubernetes is a set of rules that controls how pods are allowed to communicate with each other and with other network endpoints. It acts as a virtual firewall for your pods, allowing you to create a secure, zero-trust network environment.
+	- By default, all pods in a cluster can communicate with all other pods. Network Policies allow you to restrict this traffic, specifying which pods are allowed to accept traffic (`ingress`) and which pods are allowed to send traffic (`egress`).
+	- The most important internal detail is that **Kubernetes does not enforce Network Policies itself**. It's just an API object. The actual enforcement is handled by a **CNI (Container Network Interface) plugin** that supports them, such as Calico, Cilium, or Weave Net.
+	- **Important Rule:** Once a pod is selected by a Network Policy for either ingress or egress, any traffic that is not explicitly allowed by a rule is **denied** meaning once you mention them in your `policyTypes` it's default deny.
+	- Usually all pods have egress to kube-dns as they need to resolve service names 
+	- Public pods have ingress rules allowed for the ingress controller to access
+- **StatefulSet**
+	- A **StatefulSet** is a Kubernetes object used to manage stateful applications, such as databases, message queues, or key-value stores. Unlike a Deployment, which treats its pods as interchangeable "cattle," a StatefulSet manages a group of pods with **stable, unique identities** that are maintained across restarts.
+	- Pods are named with a stable hostname in the format `<StatefulSet-Name>-<Ordinal-Index>`. For example, `db-0`, `db-1`, `db-2`. This identity sticks with the pod for its entire lifecycle. If `db-1` is rescheduled, the new pod will still be named `db-1` and will have the same identity.
+	- A StatefulSet requires a **Headless Service** to control the network domain for its pods. A headless service does not have a single `ClusterIP`. Instead, when you query its DNS name, it returns the IP addresses of all its individual pods. This allows you to connect to a specific pod directly using its predictable DNS name (e.g., `db-1.my-service.my-namespace.svc.cluster.local`).
+	- **Creation:** When scaling up to 3 replicas, it will create `db-0` first and wait for it to be running and ready before it even starts creating `db-1`. It then waits for `db-1` before creating `db-2`.
+	- **Deletion:** When scaling down, it happens in the reverse order. It will terminate `db-2` and wait for it to shut down completely before it starts terminating `db-1`.
+	- **Updates:** Rolling updates also happen in this same reverse ordinal order.
+
+# Terraform 
+
+- **Terraform** is an open-source **Infrastructure as Code (IaC)** tool created by HashiCorp. It allows you to safely and predictably build, change, and version cloud and on-premise infrastructure using declarative configuration files
+- Instead of manually clicking through a web console to create servers or databases, you write code that describes your desired infrastructure, and Terraform figures out how to make it a reality.
+- **Terraform Core**
+	- This is the heart of Terraform. It's the command-line tool (`terraform`) that you interact with. The Core is responsible for
+		- Reading and parsing your configuration files (`.tf` files).
+		- Managing the state of your infrastructure
+		- Building a dependency graph to understand the relationships between your resources.
+		- Communicating with plugins (Providers) to execute changes.
+- **Providers**
+	- Providers are plugins that act as a translation layer between the Terraform Core and a specific target API (like AWS, Azure, Google Cloud, or even Kubernetes). Each provider exposes a set of **resources** (e.g., `aws_instance`, `azurerm_resource_group`) that you can use in your configuration.
+	- When you declare a resource, Terraform Core tells the provider what the desired state is, and the provider is responsible for making the necessary API calls to create, update, or delete the actual infrastructure.
+- **State file** ( `terraform.tfstate` )
+	- This is arguably the most important part of Terraform. The state file is a JSON file that keeps a record of the real-world infrastructure that Terraform manages. It acts as a map between your configuration files and the resources that have been created.
+	- **It tracks metadata:** It stores the unique IDs of your created resources (e.g., the AWS EC2 instance ID).
+	- **It improves performance:** It caches the last-known state of your resources, so Terraform doesn't have to query the provider for every single resource on every run.
+	- **It locks for safety:** When one person is running an apply, the state file is locked to prevent others from making concurrent, conflicting changes.
+- The entire Terraform process is a cycle that translates your code into infrastructure.
+	- `terraform init`
+		- When you run this command, Terraform Core:
+			- Scans your configuration for `provider` blocks.
+			- Downloads the necessary provider plugins from the Terraform Registry.
+			- Initializes the backend where the state file will be stored.
+	- `terraform plan`
+		- **Reads** your configuration files and the current `terraform.tfstate` file (it can also be in a backend or can be locally).
+		- **Refreshes** the state by querying the providers to get the current status of the real-world infrastructure (this might be different from .tfstate file as someone might have used the gui or some other cli other than terraform to modify the infrastructure)
+		- **Builds a dependency graph** to determine the correct order of operations.
+		- **Compares** the desired state (your code) with the current state (from the state file) and the current infrastructure and generates an **execution plan**. This plan details exactly what it will create, update, or destroy.
+	- `terraform apply`
+		- When you approve the plan, Terraform Core:
+			- Reads the execution plan generated in the previous step.
+			- Walks the dependency graph and executes the steps in the correct order.
+			- Makes calls to the **Providers** to perform the actual API operations (e.g., "AWS provider, create an EC2 instance with these specifications").
+			- After each resource is successfully created or updated, Terraform updates the **state file** with the new information.
+- **Backend**
+	- A backend determines how Terraform loads and stores its **state file**. By default, Terraform uses the "local" backend, which just stores the `terraform.tfstate` file on your local disk.
+	- It is usually stored in a s3 with a dynamodb to maintain a lock
+	- Locally terraform program enforces the lock but when we are externalising the state file then there is no terraform program in cloud to ensure that the lock is maintainted so dynamodb is used to compensate for that.
+- **Modules**
+	- A module is a self-contained package of Terraform configurations that are managed as a group. It's the primary way to organize and reuse your code.
+	- It is a collection of `.tf` files in a directory. Any set of Terraform files can be used as a module.
+	- It is really useful as you can reuse modules again and again
+	- It is especially useful to organizations cause they can create a well structured module and reuse it which will promote security
+- **Dependency Graph (DAG)**
+	- This is an internal component that Terraform builds automatically before running a `plan` or `apply`
+	- A Directed Acyclic Graph (DAG) that represents all the resources in your configuration and the relationships between them. Terraform creates this by analyzing resource dependencies (e.g., an EC2 instance depends on a subnet, which depends on a VPC).
+	- It allows Terraform to operate with maximum efficiency by creating or modifying independent resources in parallel
+	- It ensures that dependent resources are created in the correct order (e.g., it will always create the VPC before the subnet, and the subnet before the EC2 instance).
+- **Provisioners**
+	- Provisioners are used to execute scripts or actions on a local or remote machine as part of a resource's lifecycle
+	- file 
+		- used to transfer files from local to the ec2 machine
+	- local-exec
+		- Runs a script locally after the resource has been created 
+	- remote-exec 
+		- Runs a script in a the machine that was created after the resource has been created
+- **Workspaces**
+	- Workspaces allow you to manage multiple, distinct sets of infrastructure with the exact same configuration files. A common use case is to create separate environments like `dev`, `staging`, and `prod`.
+	- A command-line feature that creates a separate state file for each workspace. When you switch workspaces (e.g., `terraform workspace select dev`), all subsequent `plan` and `apply` commands will use the `dev.tfstate` file.
+	- It prevents you from having to copy your entire project into different directories for each environment. You can use variables and the `terraform.workspace` expression to make small adjustments between environments (e.g., using a smaller instance size for `dev`).
+- **Import command**
+	- Terraform is great for creating new infrastructure, but what if you have existing resources that were created manually? The `terraform import` command allows you to bring those resources under Terraform's management.
+	- A command that takes an existing resource ID and a Terraform resource address and maps them together. For example: `terraform import aws_instance.my_server i-1234567890abcdef0`
+	- How it works
+		- You first write the Terraform configuration code for the resource you want to import.
+		- You run the `import` command.
+		- Terraform queries the cloud provider for the resource's current state and writes that information into your `terraform.tfstate` file.
+		- The command **does not** generate the configuration code for you. You must write the code first
+- **Functions, Expressions, and Loops**
+	- You can use a `count` or `for_each` meta-argument with a condition to decide whether or not to create a resource. For example, `count = var.create_load_balancer ? 1 : 0` will only create the resource if the variable is true.
+	- The `for_each` expression is the modern way to create multiple, similar resources from a map or a set of strings, giving each a unique address. The older `count` can be used to create multiple resources from a number.
+	- Terraform has a rich library of functions for manipulating strings, numbers, lists, and maps (e.g., `cidrsubnet()`, `lookup()`, `format()`), allowing you to create dynamic and flexible configurations.
+
+# Monitoring 
+
+- **Prometheus**
+	- Prometheus is an open-source monitoring and alerting toolkit designed for reliability and scalability. It collects and stores its metrics as **time-series data**,meaning data is stored with a timestamp, a metric name, and a set of key-value pairs called labels.
+	- **Core Components**
+		- **Scraping**
+			- The core Prometheus server is responsible for data collection. At regular, configured intervals (e.g., every 15 seconds), it reaches out to HTTP endpoints on various targets to "scrape" (pull) the current state of their metrics.
+		- **Exporters**
+			- Many applications don't expose metrics in the Prometheus format by default. An **exporter** is a small, specialized piece of software that acts as a translator. It sits alongside an application (like a database or a hardware system), collects metrics from it, and exposes them in the Prometheus text-based format so the Prometheus server can scrape them. Common examples include the **Node Exporter** (for server hardware and OS metrics) and the **JMX Exporter** (for Java applications).
+		- **Time-Series Database (TSDB)**
+			- Once the data is scraped, the Prometheus server stores it in its own highly efficient, local time-series database. This database is optimized for the high-volume, continuous stream of data typical of monitoring systems.
+		- **PromQL (Prometheus Query Language):** To analyze the collected data, you use PromQL. It's a powerful and flexible query language designed specifically for time-series data, allowing you to select, aggregate, and perform complex calculations on your metrics.
+- **Grafana**
+	- Grafana is an open-source visualization and analytics platform. It allows you to query, visualize, alert on, and understand your metrics no matter where they are stored.
+	- **Core Components**
+		- **Data Sources**
+			- The first step in Grafana is to configure a **Data Source**. This tells Grafana how to connect to your backend database (in this case, your Prometheus server). You provide the URL and any necessary authentication. Grafana has plugins for dozens of different data sources.
+		- **Dashboards and Panels**
+			- A **dashboard** is a collection of visualizations. Each individual chart, graph, or table on a dashboard is called a **Panel**.
+		- **The Query Process**
+			- Each Panel on the dashboard has a query associated with it (e.g., a PromQL query).
+			- The Grafana server sends these queries to the configured **Prometheus** data source.
+			- Prometheus executes the PromQL query against its time-series database and returns the result to Grafana.
+			- Grafana's frontend then renders this data into the specified visualization type (a line graph, a gauge, a single stat, etc.).
+- In a k8s monitoring system 
+	- You configure a scrape job in your Prometheus configuration file (`prometheus.yml`) using `kubernetes_sd_config`. This tells Prometheus to talk to the Kubernetes API server.
+	- Prometheus continuously asks the Kubernetes API server questions like, "Give me a list of all pods in the cluster," or "Give me a list of all services."
+	- Based on the API's response, Prometheus dynamically generates a list of scrape targets. For example, if it discovers a pod with the annotation `prometheus.io/scrape: 'true'`, it will add that pod's IP address and port to its list of things to monitor.
+	- Prometheus then reaches out directly to the HTTP metrics endpoint on each of these targets (e.g., `<pod-ip>:8080/metrics`) and pulls the latest metric data, storing it in its time-series database.
+	- In grafana first, you configure Prometheus as a **Data Source** in the Grafana UI. You just need to provide the internal URL of your Prometheus server (e.g., `http://prometheus-server.monitoring.svc.cluster.local:9090`).
+	- When you open a Grafana dashboard, each panel has a **PromQL query** associated with it (e.g., `rate(http_requests_total[5m])`).
+	- The Grafana server takes this PromQL query and sends it as an HTTP API request to the Prometheus server's query endpoint (e.g., `/api/v1/query`).
+	- The Prometheus server executes the query against its time-series database and sends the resulting data back to Grafana in a structured JSON format.
+	- Grafana's frontend receives this JSON data and renders it into the beautiful graph, gauge, or table that you see in the panel.
+- **SLI (Service Level Indicator):** A quantitative **measure** of your service's performance. It's a raw metric that indicates how well your service is doing.
+    - **Example:** The percentage of successful HTTP requests (non-5xx responses) out of the total requests.
+- **SLO (Service Level Objective):** The **target** or goal you set for an SLI over a specific period. This is the promise you make to your users about your service's reliability.
+    - **Example:** 99.9% of HTTP requests will be successful over a rolling 30-day window.
+- **Error Budget:** The direct consequence of your SLO. It's the acceptable amount of failure. An SLO of 99.9% gives you an **error budget of 0.1%**. This budget empowers teams to take calculated risks, like deploying new features, as long as they don't "spend" their entire budget on failures.
+- **SLA (Service Level Agreement):** This is a business or legal **contract** with a customer that includes the SLOs. It specifies the consequences (e.g., financial credits) if the SLOs are not met. SLAs are a business concern, while SLIs and SLOs are engineering tools.
+# AWS
+
+- **AWS Networking Stack**
+	- This refers to the core set of services that allow you to build an isolated, secure network environment in the AWS cloud. It's the foundation upon which all other resources, like EC2 instances and databases, are built. The primary components are the VPC, Subnets, and Security Groups.
+	- **VPC**
+		- A VPC is your own logically isolated section of the AWS cloud. It's a virtual network that you define and control, closely resembling a traditional network that you'd operate in your own data center. When you create a VPC, you specify a private IP address range for it.
+	- **Subnet**
+		- A subnet is a sub-division or a smaller segment of your VPC's IP address range. Subnets are used to organize and isolate resources within your VPC. They can be configured as **public** or **private**.
+		- **Public Subnet:** Has a route to an Internet Gateway, meaning resources within it can be directly accessible from the internet.
+		- **Private Subnet:** Does not have a direct route to the internet. Resources within it are isolated and can only access the internet via a NAT Gateway.
+	- **Bastion Host**
+		- A Bastion Host is a special-purpose EC2 instance that is placed in a public subnet and is used to securely access and manage resources in a private subnet. Instead of exposing your sensitive resources like databases to the internet, you connect to the bastion host via SSH, and from there, "jump" to your private resources.
+	- **Security Groups**
+		- A Security Group acts as a virtual, stateful firewall for your EC2 instances to control inbound and outbound traffic. You create rules that allow traffic based on protocol, port, and source/destination IP address. For example, you can create a rule that only allows SSH traffic from your office IP address.
+	- **AWS Cost saving**
+		- **Right-Sizing Instances:** Analyze your resource utilization and choose the smallest EC2 instance type that meets your performance needs.
+		- **Using Spot Instances:** For fault-tolerant workloads like batch processing or CI/CD, you can use Spot Instances to get up to a 90% discount on EC2 pricing.
+		- **Reserved Instances & Savings Plans:** For predictable, long-term workloads, you can commit to a 1 or 3-year term to receive a significant discount compared to On-Demand pricing.
+		- **Leveraging Serverless:** Use services like AWS Lambda and Fargate where you only pay for the compute time you consume, eliminating the cost of idle servers.
+		- **Implementing Lifecycle Policies:** Automatically move infrequently accessed data in S3 to cheaper storage tiers or delete old EBS snapshots.
+	- **AWS EKS**
+		- EKS is a **managed Kubernetes service**. AWS manages the Kubernetes control plane for you, including the API server and etcd database, ensuring it is highly available and patched. You are responsible for creating and managing the worker nodes (EC2 instances) where your application pods run. It provides a standard, open-source Kubernetes experience.
+	- **AWS ECS**
+		- ECS is AWS's proprietary container orchestration service. It is a simpler, more AWS-native alternative to Kubernetes. With ECS, you define your application in a "Task Definition" and run it as a "Service." It is deeply integrated with other AWS services. ECS has two launch types:
+			- **EC2:** You manage the underlying cluster of EC2 instances.
+			- **Fargate:** A serverless option where AWS manages the underlying infrastructure for you, and you just run your container.
+	- **AWS ECR**
+		- **ECR** stands for **Amazon Elastic Container Registry**. It's a fully managed Docker container registry from AWS that allows you to store, manage, share, and deploy your container images.
+# AI-ML with python 
+
+- basic python stuff
+
+## Python ML libraries
+
+- **Numpy**
+	- NumPy (Numerical Python) is the fundamental package for scientific computing in Python. It provides support for large, multi-dimensional arrays and matrices, along with mathematical functions to operate on these arrays efficiently
+	- You can create arrays with `np.array()` and do operations on them like `np.sum()`, `np.mean()` etc
+- **Pandas**
+	- Pandas is a powerful data manipulation and analysis library built on top of NumPy. It provides data structures like DataFrames and Series that make data analysis intuitive and efficient.
+	- You can declare a dataframe and do operations on it like `df.info()`, `df.describe()` , `df.groupby()` etc
+
+## Frameworks
+
+- **AWS Bedrock**
+	- AWS Bedrock is a fully managed service that provides access to foundation models from leading AI companies through a single API. It allows you to build and scale generative AI applications using various models including Claude, GPT, and others.
+- **LangChain**
+	- **LangChain** is an open-source framework designed to simplify the creation of applications powered by Large Language Models (LLMs). It's not an LLM itself, but rather a set of tools, components, and interfaces that acts as the "glue" for building complex, data-aware, and agentic applications.
+	- **Core Components** 
+		- LangChain's power comes from its modular components, which can be "chained" together to create sophisticated logic.
+		- **Models**
+			- This is the core connection to the "brain." LangChain provides a standard interface to connect to hundreds of different LLMs and embedding models.
+			- It has different types of models
+				- LLMs
+					- simple single response llms 
+				- Chat Models 
+					- Models that use sequence of messages (also llms)
+				- Text embedding models 
+					- Models that vectorize the data
+					- Used in buildign RAG 
+		- **Prompts**
+			- Langchain allows you to create reusable prompt templates 
+		- **Chains**
+			- Chains are the fundamental building block of LangChain, allowing you to combine multiple components into a single, cohesive application.
+			- A simple chain might take user input, format it with a `PromptTemplate`, and then send it to an `LLM`. More complex chains can combine the output of one chain as the input to another.
+		- **Indexes and Retrieval (The "Data-Aware" Part)**
+			- This is how you connect an LLM to your own private data, enabling a powerful pattern called **Retrieval-Augmented Generation (RAG)**.
+			- **Document Loaders:** These modules load data from various sources (PDFs, websites, databases, etc.) into a standard `Document` format.
+			- **Text Splitters:** LLMs have context limits, so you can't feed them a 100-page document. Splitters break large documents into smaller, semantically meaningful chunks.
+			- **Vector Stores:** To find the most relevant chunks of text for a user's query, you need a way to search based on meaning, not just keywords. This is done by creating "embeddings" (numerical representations) of each chunk and storing them in a specialized database called a vector store (e.g., Chroma, Pinecone).
+			- **Retrievers:** This is the interface that fetches the most relevant documents from the vector store based on a user's query.
+		- **Agents**
+			- **Tools:** A tool is a specific capability that an agent can use, such as a Google Search, a calculator, or a Python code executor. You give the agent a set of tools it's allowed to use.
+			- **Agent Executor:** This is the runtime for an agent. It operates in a loop:
+			    1. It sends the user's prompt and the available tools to the LLM.
+			    2. The LLM "thinks" about which tool to use and with what input.
+			    3. The executor runs the chosen tool and gets an observation (the result).
+			    4. It sends the result back to the LLM to decide on the next step, repeating until it has the final answer.
+		- **Memory**
+			- Langchain is by default stateless, but the conversation can be saved using memory components such as `ConversationalBufferMemory` etc
+- **LangGraph**
+	- LangGraph is a library built on top of LangChain that allows you to create complex, stateful, and cyclical applications using the structure of a **graph**. It's specifically designed for building reliable and robust LLM agents and multi-agent systems.
+	- Think of it as a way to create a **flowchart for your LLM application**. While standard LangChain chains are great for linear, one-way sequences, LangGraph allows you to create loops, branches, and more complex interactions, which is essential for agentic behavior.
+	- **Core Components**
+		- **State**
+			- The **State** is the most central concept. It's a shared object (like a Python dictionary or Pydantic class) that is passed around the graph. Each step in the graph can read from and write to this state. It acts as the shared memory for the entire process.
+		- **Nodes**
+			- **Nodes** are the "steps" or "actions" in your flowchart. Each node is a function or a LangChain Runnable that performs a piece of work. A node receives the current `State` as input and returns a dictionary of values to update the state.
+		- **Edges**
+			- **Edges** are the "arrows" in your flowchart that connect the nodes. They determine the path of execution. There are three main types of edges:
+				- The Entry Point
+					- A special edge that defines which node the graph should start with.
+				- Normal Edges
+					- These connect one node to another unconditionally. After Node A finishes, the process will always proceed to Node B.
+				- Conditional Edges
+					- This is where the magic happens. A conditional edge acts like a "decision diamond" in a flowchart. It's a function that inspects the current `State` (usually the output of the last node) and decides which node to go to next. This is how you create loops and branches.
+

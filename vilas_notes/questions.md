@@ -5,6 +5,7 @@
 
 - dogfooding and catfooding?
 
+
 ---
 
 - difference between git fetch and git pull?
@@ -23,4 +24,7 @@
 - If you run `docker system prune` , does it prune everyting?
 
 ---
+
+# Revision Questions 
+
 

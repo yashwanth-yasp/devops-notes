@@ -1,0 +1,23 @@
+---
+date: 2025-09-23
+tags:
+  - ust
+  - ai
+  - kubernetes
+  - docker
+  - monitoring
+---
+- What could cause a crashloopbackoff?
+	- Application-Level Failures
+		- Uncaught exceptions / fatal errors in the app
+		- **Mismatched versions** of dependencies or binaries inside the image.
+		- App starts, then immediately exits because the main process finished.
+	- Command / EntryPoint Issues
+		- Wrong `CMD` or `ENTRYPOINT` in Dockerfile
+	- Liveness Probes Killing Pod
+		- A **failing liveness probe** makes Kubelet kill the container repeatedly
+	- Resource Limits
+		- Container runs out of memory → OOMKilled.
+		- CPU throttling can also make app unresponsive, which can trip probes.
+	- Init Containers Not Completing
+	- Image Issues

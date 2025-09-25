@@ -1,0 +1,148 @@
+- linux scripting
+- git basics
+	- gitflow vs trunk 
+	- rebase vs merge
+	- conflict resolutions workshop 
+	- pre commit hooks, pull request lifcycel, code review practices, git diff
+- docker 
+	- images
+	- containers
+	- internals of images 
+		- how they are stored
+	- docker file commands to create images
+	- best practices
+		- security hardening while creating images 
+	- what exactly is a container
+	- how does docker create a container 
+	- kernel's responsibility and feature sused while reating containeers
+	- COW
+	- writable layer
+	- volumes
+		- types of volumes
+			- bind mounts
+			- tmpfs
+			- volumes
+				- named
+				- anonymous
+	- networking
+		- internals of docker bridge networking
+		- bridge network
+		- host network
+		- None network
+	- docker compose overview
+	- theorically and practically covered all 
+		- except practicals of internals, tmpfs
+	- in project 
+		- no internals
+		- networking
+		- compose 
+		- volumes
+- k8s
+	- intro 
+	- overview of orchestration
+	- architecture
+	- pods
+	- rs
+	- deployments
+	- statefulsets
+	- daemonset
+	- services
+		- clusterip
+		- nodeport
+		- loadbalancer
+	- ingress
+	- hpa
+	- cluster autoscaler 
+	- vpa
+	- volumes
+		- pv
+		- pvc
+		- storageclass
+		- dynamic vs static provisioning 
+		- storage types
+	- reclaim policy
+	- access types
+	- network policy
+	- rbac using certificates
+	- secrets 
+	- configmaps
+	- scheduling
+		- taints
+		- tolerations
+		- nodename
+		- label based scheduling
+	- probes
+	- limits
+	- Internals of k8s networking
+	- theoritically - all
+	- practially - all except internals, daemonsets, CA, VPA, dynamic provisioning
+	- project - all except internals, daemonsets, CA, VPA, dynamic provisioning, loadbalancer, scheduling
+- github actions
+	- ci/cd intro
+	- ci/cd in github
+	- triggering terraform workflows in github
+	- secrets
+	- self-hosted runner 
+	- one click or automatic deployment
+	- workflow\_dispatch
+	- workflow run 
+	- jobs 
+	- stages
+	- steps
+	- actions
+	- workflow dependency
+	- cicd
+		- setup env
+		- checkout code
+		- linting 
+		- sast
+		- sca
+		- sast
+		- build 
+		- unit test
+		- docker image build
+		- image scan
+		- docker image push
+	- deploying to k8s cluster
+	- dast
+	- artifacts 
+	- caching
+- AWS
+	- networking stack
+	- vpc
+	- subnet 
+	- bastian host
+	- security group
+	- cost saving 
+	- aws eks 
+	- ecs 
+- Terraform
+	- providers (aws)
+	- modules
+	- init, plan, apply, destroy, validate, format
+	- remote backend
+	- state locking
+	- data
+	- variables 
+	- output
+	- provisioners
+	- meta-arguments
+		- count 
+		- foreach
+	- workspaces
+	- practical - all except meta arguments, provisioners, workspaces, data
+- Monitoring
+	- install promethues and grafana using helm/yaml
+	- accessing pre-deployed charts
+	- 
+- AI/ML
+	- AWS bedrock
+	- langchain 
+	- langgraph
+	- RAG 
+		- data retrieval from vector db 
+	- prompts
+	- llms
+	- query the k8s cluster using langgraph and bedrock
+	- numpy 
+	- regression
